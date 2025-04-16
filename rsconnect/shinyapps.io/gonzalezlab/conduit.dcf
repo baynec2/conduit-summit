@@ -5,9 +5,9 @@ account: gonzalezlab
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14086739
-bundleId: 9850203
+bundleId: 10010901
 url: https://gonzalezlab.shinyapps.io/conduit/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: example/app.R|README.md|test/app.R|fragpipe_analyst_template
+ignoredFiles: README.md

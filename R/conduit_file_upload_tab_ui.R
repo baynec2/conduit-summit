@@ -17,7 +17,7 @@ conduit_file_upload_tab_ui = function(){
       status = "info",
       footer = fluidRow(
         column(
-          width = 3,
+          width = 4,
           descriptionBlock(
             text = "# Samples",
             header = textOutput("num_samples"),  # Corrected to textOutput directly
@@ -26,16 +26,7 @@ conduit_file_upload_tab_ui = function(){
           )
         ),
         column(
-          width = 3,
-          descriptionBlock(
-            text = "# of Sample Metadata Variables",
-            header =textOutput("num_sample_md_variables"),  # Corrected to the correct output
-            rightBorder = FALSE,
-            marginBottom = FALSE
-          )
-        ),
-        column(
-          width = 3,
+          width = 4,
           descriptionBlock(
             text = "# of Species Detected",
             header =textOutput("num_species_detected"),
@@ -45,7 +36,7 @@ conduit_file_upload_tab_ui = function(){
           )
         ),
         column(
-          width = 3,
+          width = 4,
           descriptionBlock(
             text = "# of Proteins Detected",
             header = textOutput("num_proteins_detected"),
