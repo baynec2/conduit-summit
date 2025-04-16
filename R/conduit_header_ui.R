@@ -6,8 +6,40 @@ conduit_header_ui <- function() {
         title = "Plot Options",
         id = "plot_options",
         icon = icon("magnifying-glass-chart"),
-        uiOutput("plot_color_choices_ui"),
-        uiOutput("plot_shape_choices_ui")
+        selectInput("plot_theme",
+                    "Select Plot Theme",
+                    choices = c("ggprism",
+                                "theme_classic",
+                                "theme_bw",
+                                "theme_dark",
+                                "theme_void",
+                                "theme_light",
+                                "theme_minimal")
+        ),
+        selectInput("color_palette",
+                    "Select a color palette:",
+                    choices = c("viridis", "plasma", "magma", "cividis"),
+                    selected = "viridis"
+        ),
+        selectInput("plot_file_format",
+                    "Select a plot file format:",
+                    choices = c("pdf", "png", "svg", "jpeg","tiff","eps"),
+                    selected = "pdf"
+        ),
+        numericInput("plot_height",
+                     "Plot height (inches):",
+                     value = 7,  # Default value
+                     min = 1,    # Minimum allowed width
+                     max = 50,   # Maximum allowed width
+                     step = 0.5  # Increment step
+        ),
+        numericInput("plot_height",
+                     "Plot width (inches):",
+                     value = 7,  # Default value
+                     min = 1,    # Minimum allowed width
+                     max = 50,   # Maximum allowed width
+                     step = 0.5  # Increment step
+        )
       ),
       dropdownBlock(
         title = "Aggregation Level",

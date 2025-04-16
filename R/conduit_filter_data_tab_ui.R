@@ -33,7 +33,7 @@ conduit_filter_data_tab_ui = function(){
         background = NULL,
         status = "primary",
         title = "Filtered Data Preview",
-        verbatimTextOutput("filtered_result")
+        verbatimTextOutput("filtered_qfeatures")
       )
     )
   )
