@@ -267,51 +267,80 @@ conduit_analysis_tab_ui <- function() {
         )
       ),
       tabPanel(
-        "Outcome Prediction",
+        "Classification Prediction",
         fluidRow(
       box(
-        title = "Prediction Settings",
+        title = "Model Settings",
         status = "primary",
         solidHeader = TRUE,
         width = 4,
-        selectInput("predict_var", "Select outcome variable", choices = NULL),
+        selectInput("outcome_var", "Select outcome variable", choices = NULL),
         sliderInput("split_ratio", "Train/Test Split % (Train)", min = 50, max = 90, value = 70),
-        selectInput("model_type", "Model Type", choices = c("Logistic Regression", "Random Forest", "XGBoost")),
+        selectInput("model_type", "Model Type", choices = c("lasso_regression", "random_forest", "xgboost")),
         checkboxInput("show_advanced", "Show advanced options", value = FALSE),
 
         conditionalPanel(
           condition = "input.show_advanced == true",
           tags$hr(),
-          selectInput("predictors_to_include", "Predictors to include (optional):",
-                      choices = NULL, multiple = TRUE, selectize = TRUE),
           numericInput("cv_folds", "Number of CV folds:", value = 5, min = 2, max = 20),
-          numericInput("cv_repeats", "Number of repeats (if applicable):", value = 1, min = 1, max = 10),
-          selectInput("metric_to_optimize", "Metric to optimize:",
-                      choices = c("roc_auc", "accuracy", "sens", "spec"), selected = "roc_auc"),
           numericInput("random_seed", "Random seed:", value = 123)
         ),
-
-        actionButton("run_model", "Run Model", icon = icon("cogs"))
+        actionButton("run_classification_model", "Run Model", icon = icon("cogs"))
       ),
       box(
-        title = "ROC Curve - Training",
+        title = "Confusion Matrix",
+        status = "primary",
+        solidHeader = TRUE,
         width = 8,
-        plotOutput("roc_train")
+        plotOutput("confusion_matrix_plot")
       )
     ),
     fluidRow(
       box(
-        title = "ROC Curve - Test",
+        title = "Type of Plot To Show",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        selectInput("model_plot_type","choose type of plot",
+                    choices = c("ROC","precision_recall")
+                    )
+      )
+    ),
+    fluidRow(
+      box(
+        title = "Plot of Test Set",
+        status = "primary",
+        solidHeader = TRUE,
         width = 6,
-        plotOutput("roc_test")
+        plotOutput("test_plot")
       ),
       box(
-        title = "Feature Importance",
+        title = "Plot of Training Set",
+        status = "primary",
+        solidHeader = TRUE,
         width = 6,
-        plotOutput("feature_importance")
+        plotOutput("train_plot")
+      )
+    ),
+    fluidRow(
+      box(
+        title = "Features to show",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        uiOutput("feautres_to_show_slider_ui")
+        )
+      ),
+    fluidRow(
+      box(
+        title = "Feature Importance",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        plotOutput("feature_importance_plot")
       )
     )
-      )
+       )
     )
   )
 }
