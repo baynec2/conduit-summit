@@ -23,6 +23,20 @@ ui <- shinydashboardPlus::dashboardPage(
   sidebar = conduit_sidebar_ui(),
   body = dashboardBody(
     shinyjs::useShinyjs(),
+    # Making a nice disconnect message.
+    shinydisconnect::disconnectMessage(
+      text = "Something went wrong! Try refreshing the page.",
+      refresh = "Refresh",
+      background = "#15131efe",
+      colour = "#FFFFFF",
+      refreshColour = "#f3b24bff",
+      overlayColour = "#15131efe",
+      overlayOpacity = 1,
+      width = "full",
+      top = "center",
+      size = 24,
+      css = ""
+    ),
     # Greying out tabs
     tags$style(HTML("
   .disabled-tab {
@@ -30,36 +44,20 @@ ui <- shinydashboardPlus::dashboardPage(
     color: #aaa !important;
   }
 ")),
-   # Setting up the loading screen for when the app is loading.
-   # This breaks Data filter for some reason
-    useWaiter(),
-    autoWaiter(
-      color = "#15131efe",
-      html = tagList(
-        spin_loaders(color = "#f3b24bff"),
-        br(),
-        br(),
-        c(
-          "Crunching numbers..."
-        )
-      )
-    ),
-    # useHostess(),
-    # waiterShowOnLoad(
-    #   color = "#15131efe",
-    #   hostess_loader(
-    #     "loader",
-    #     text_color = "#FFF",
-    #     class = "label-center",
-    #     center_page = TRUE,
-    #     progress_type = "fill",
-    #     fill_direction = "ltr",
-    #     svg ="conduit_loading.svg",
-    #     fill_color = "#15131efe",
-    #     color_background = "#15131efe",
-    #     `data-fill-background`="#15131efe"
-    #   )
-    # ),
+   # # Setting up the loading screen for when the app is loading.
+   # # This breaks Data filter for some reason
+   #  useWaiter(),
+   #  autoWaiter(
+   #    color = "#15131efe",
+   #    html = tagList(
+   #      spin_loaders(color = "#f3b24bff"),
+   #      br(),
+   #      br(),
+   #      c(
+   #        "Crunching numbers..."
+   #      )
+   #    )
+   #  ),
     use_theme(conduit_theme),
     tabItems(
       conduit_about_tab_ui(),

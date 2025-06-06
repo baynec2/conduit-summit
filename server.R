@@ -311,23 +311,27 @@ server <- function(input, output, session) {
       input$normalization_method
     )
 
-    message <- paste0(
-      "Your data is being processed using a log base of ",
-      input$log_base, ", an imputation method of ",
-      input$imputation_method, ", and a ",
-      input$normalization_method, " normalization method. Please wait...",
-      selected_assay(), " aggregation results will be shown by default.",
-      "If you would like to change any of the options listed above, different
-      options can be selected from the tabs at the top of the screen."
-    )
-
-
-    showModal(modalDialog(
-      title = "Processing",
-      message,
-      easyClose = FALSE,
-      footer = NULL
+    message <- HTML(paste0(
+      "<p>Your <b>", selected_assay(), "</b> data is being processed with the following settings:</p>",
+      "<ul>",
+      "<li><b>Log base:</b> ", input$log_base, "</li>",
+      "<li><b>Imputation method:</b> ", input$imputation_method, "</li>",
+      "<li><b>Normalization method:</b> ", input$normalization_method, "</li>",
+      "</ul>",
+      "<p>Please wait while the data is being processed...</p>",
+      "<p><i>If you’d like to change any of the options above, you can do so from the tabs at the top of the screen.</i></p>"
     ))
+
+    shinyalert::shinyalert(
+      title = "Data Processing",
+      text = message,
+      type = "info",
+      html = TRUE,
+      showCancelButton = FALSE,
+      closeOnClickOutside = FALSE,
+      showConfirmButton = FALSE,
+      size = "l"
+    )
 
     # Compute updated QFeatures object
     new_qf <- conduitR::add_log_imputed_norm_assays(
@@ -340,7 +344,8 @@ server <- function(input, output, session) {
     # Store relative abundance information for the taxonomic data
     new_qf <- conduitR::add_relative_abundance_assays(new_qf)
 
-    removeModal()  # Done processing
+   # removeModal()  # Done processing
+    shinyalert::closeAlert()
     new_qf
   })
 
@@ -408,7 +413,7 @@ server <- function(input, output, session) {
   # Ploting the heatmap
   output$missing_value_plot <- renderPlot({
     conduitR::plot_missing_val_heatmap(final_qf(),
-                                       assay_name = processed_assay(),
+                                       assay_name = selected_(),
                                        col_color_variables = input$miss_val_heatmap_col_color_choices,
                                        row_color_variables = input$miss_val_heatmap_row_color_choices,
                                        scale = FALSE)
@@ -440,7 +445,7 @@ server <- function(input, output, session) {
   ### Intensity Distribution ###
 
   output$intensity_distribution_plot <- renderPlot({
-    DEP::plot_detect(final_qf()[[processed_assay()]])
+    DEP::plot_detect(final_qf()[[selected_assay()]])
   })
 
   ### Density Plot ###
@@ -477,7 +482,7 @@ server <- function(input, output, session) {
 
   # Rendering the UI Shape Choice Selection
   output$pca_plot_shape_choice_ui <- renderUI({
-    req(colData(),req(input$agg_level_choices))
+    req(final_colData_names())
     selectInput("pca_plot_shape_choice", "Choose shape variable",
                 choices = c("none" = "",final_colData_names()),
                 selected = "")
@@ -498,6 +503,16 @@ server <- function(input, output, session) {
   ##############################################################################
   # Heatmap Plotting
   ##############################################################################
+  # UI for selecting number of variables:
+  output$heatmap_feature_number_ui <- renderUI({
+    req(final_qf(),processed_assay())
+    sliderInput("heatmap_feature_number",
+                 "Max N Of Rows To Show",
+                 min = 1,
+                 max = nrow(SummarizedExperiment::rowData(final_qf()[[processed_assay()]])),
+                 value = 1000
+                 )
+  })
 
   # UI for selecting color variables
   output$heatmap_col_color_choices_ui <- renderUI({
@@ -516,19 +531,54 @@ server <- function(input, output, session) {
                 multiple = TRUE)
   })
 
+
+
   # Dynamically swap between interactive and static outputs
   output$heatmap_plot_ui <- renderUI({
     if (input$heatmap_plot_type == "interactive") {
-      plotly::plotlyOutput("heatmap_plotly")
+      shinycssloaders::withSpinner(
+        plotly::plotlyOutput("heatmap_plotly",height = "600px"),
+        type = 8, caption = "One interactive heatmap coming up...",
+        color = "#15131efe"
+      )
     } else {
-      plotOutput("heatmap_plot_static")
+      shinycssloaders::withSpinner(
+        plotOutput("heatmap_plot_static",height = "600px"),
+        type = 8, caption = "One static heatmap is on the way...",
+        color = "#15131efe"
+      )
     }
   })
+
+
+
+  heatmap_qf <- reactive({
+    req(final_qf(), processed_assay(), input$heatmap_feature_number)
+
+    qf <- final_qf()
+    assay_name <- processed_assay()
+    assay_obj <- qf[[assay_name]]
+    mat <- SummarizedExperiment::assay(qf[[assay_name]])
+
+    # Compute variances
+    variances <- apply(mat, 1, var, na.rm = TRUE)
+    n <- min(input$heatmap_feature_number, nrow(mat))
+    top_n_idx <- order(variances, decreasing = TRUE)[seq_len(n)]
+
+    # Subset the assay
+    assay_obj <- assay_obj[top_n_idx, ]
+
+    # Reconstruct QFeatures with just the one modified assay
+    qf_single <- qf[NULL]                      # Drop all assays
+    qf_single[[assay_name]] <- assay_obj       # Add back just the one
+
+    qf_single
+    })
 
   # Shared args for both plot functions
   heatmap_args <- reactive({
     list(
-      qf = final_qf(),
+      qf = heatmap_qf(),
       assay_name = processed_assay(),
       col_color_variables = input$heatmap_col_color_choices,
       row_color_variables = input$heatmap_row_color_choices
@@ -611,7 +661,7 @@ server <- function(input, output, session) {
   # Adding the missing rowData to the stats.
    conduitR::add_rowdata_to_limma_results(results$top_table,
                                           final_qf(),
-                                          assay_name) |>
+                                          processed_assay()) |>
      dplyr::mutate(dplyr::across(where(is.numeric), round, digits = 2))
 
   })
@@ -673,7 +723,7 @@ server <- function(input, output, session) {
   # UI Generation
 
   final_colData_and_rowData_names <- reactive({
-    unique(c(final_colData_names,final_rowData_names))
+    unique(c(final_colData_names(),final_rowData_names()))
   })
 
   # X axis
@@ -753,6 +803,7 @@ server <- function(input, output, session) {
     req(final_qf())
     SummarizedExperiment::colData(final_qf())
   })
+
   numeric_colData_names <- reactive({
     req(final_colData(),final_colData_names())
     final_colData_names()[sapply(final_colData(), is.numeric)]
@@ -777,13 +828,31 @@ server <- function(input, output, session) {
 
   predict_classification_list <- eventReactive(input$run_classification_model, {
     req(final_qf(),processed_assay(),input$outcome_var,
-        input$split_ratio,input$model_type,input$cv_folds)
-    showModal(modalDialog(
-      title = "Running Classification Model",
-      "Please wait while the model is being generated...",
-      footer = NULL,
-      easyClose = TRUE
+        input$split_ratio,input$model_type,input$cv_folds,input$random_seed)
+
+    set.seed(random_seed)
+
+    message <- HTML(paste0(
+      "<p>Your <b>", selected_assay(), "</b> data is being used to generate a classification model with the following parameters:</p>",
+      "<ul>",
+      "<li><b>Model Type:</b> ", input$model_type, "</li>",
+      "<li><b>Outcome Variable:</b> ", input$outcome_var, "</li>",
+      "<li><b>Train/Test Split Percentage:</b> ", input$split_ratio, "</li>",
+      "<li><b>Cross-Validation Folds:</b> ", input$cv_folds, "</li>",
+      "</ul>",
+      "<p>Please wait while the model is generated...</p>"
     ))
+
+    shinyalert::shinyalert(
+      title = "Generating Model",
+      text = message,
+      type = "info",
+      html = TRUE,
+      showCancelButton = FALSE,
+      closeOnClickOutside = FALSE,
+      showConfirmButton = FALSE,
+      size = "l"
+    )
 
     result <- conduitR::predict_classification(
       final_qf(),
@@ -793,7 +862,8 @@ server <- function(input, output, session) {
       model_type = input$model_type,
       v = input$cv_folds
     )
-    removeModal()
+
+    shinyalert::closeAlert()
     result
   })
 
