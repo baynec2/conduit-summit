@@ -1,0 +1,54 @@
+# Conduit
+
+A modern graphical user interface application built with R Shiny, providing an intuitive and user-friendly experience for managing and interacting with metaproteoemic data processed by [Conduit](https://github.com/baynec2/conduit).
+
+## Features
+
+- Modern and intuitive user interface
+- Interactive data visualization
+- Real-time data processing
+- Easy-to-use controls and navigation
+- Responsive design
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- R (version 4.0.0 or higher)
+- RStudio (recommended for development)
+
+Better instructions will be added soon
+
+## Installation
+
+1. Clone the repository:
+```bash, eval = FALSE
+git clone https://github.com/baynec2/conduit-GUI.git
+cd conduit-GUI
+```
+
+2. Install required R packages: (To be updated this is a placeholder)
+```r, eval = FALSE
+install.packages(c("shiny", "shinydashboard", "tidyverse", "plotly"))
+```
+
+## Running the Application
+
+To run the Shiny app locally:
+
+1. Open the project in RStudio
+2. Open the `app.R` file
+3. Click 'Run App' in RStudio, or run:
+
+```r, eval = FALSE
+shiny::runApp()
+```
+
+## Development
+
+The application structure follows R Shiny best practices:
+- `app.R`: Main application file
+- `R/`: Global variables and functions
+- `ui.R`: User interface components
+- `server.R`: Server-side logic
+- `www/`: Static assets (CSS, JavaScript, images)
+

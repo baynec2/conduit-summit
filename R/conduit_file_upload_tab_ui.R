@@ -57,8 +57,12 @@ conduit_file_upload_tab_ui = function(){
           width = 12,
           solidHeader = TRUE,
           status = "primary",
-          plotOutput("taxa_tree_plot", width = "100%",height = "900px")
-      )
+          shinycssloaders::withSpinner(
+            plotOutput("taxa_tree_plot", width = "100%",height = "900px"),
+            type = 8,caption = "Please wait, the taxonomic tree is loading...",
+            color = "#15131efe"
+          )
+          )
     ),
     fluidRow(
         box(title = "Protein Taxonomy Table",
