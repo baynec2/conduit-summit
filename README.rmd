@@ -1,3 +1,17 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%"
+)
+```
+
 # Conduit
 
 A modern graphical user interface application built with R Shiny, providing an intuitive and user-friendly experience for managing and interacting with metaproteoemic data processed by [Conduit](https://github.com/baynec2/conduit).
@@ -21,12 +35,14 @@ Better instructions will be added soon
 ## Installation
 
 1. Clone the repository:
+
 ```bash, eval = FALSE
 git clone https://github.com/baynec2/conduit-GUI.git
 cd conduit-GUI
 ```
 
 2. Install required R packages: (To be updated this is a placeholder)
+
 ```r, eval = FALSE
 install.packages(c("shiny", "shinydashboard", "tidyverse", "plotly"))
 ```
