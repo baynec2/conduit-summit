@@ -37,11 +37,11 @@ conduit_about_tab_ui = function(){
         div(
           class = "info-box", # Apply custom class to the info section
           box(
-            title = "About Conduit-GUI",
+            title = "About Conduit-Summit",
             width = NULL, # Default width
             solidHeader = TRUE,
             status = "primary", # You can change the status to other options like "warning"
-            p(strong("Conduit-GUI is a tool designed to help analyze metaproteomics data.")),
+            p(strong("Conduit-Summit is a tool designed to help analyze metaproteomics data.")),
             br(), # Adds space for visual separation
             p("It is a full-featured suite of tools that allows you to:"),
             tags$ul(
@@ -50,18 +50,19 @@ conduit_about_tab_ui = function(){
               tags$li("Transform, Normalize, and Impute data"),
               tags$li("Perform statistical analyses"),
               tags$li("Prepare publication-quality plots"),
+              tags$li("Traverse relationships across data aggregation levels"),
               tags$li("Assess Biomarkers"),
               tags$li("and more!")
             ),
             br(), # Adds space for visual separation
             p(
               "It operates on the data output from the ",
-              a("snakemake metaproteomics workflow named Conduit", href = "https://github.com/baynec2/conduit")
+              a("snakemake metaproteomics workflow named Conduit-Ascent", href = "https://github.com/baynec2/conduit-ascent")
             ),
             p("Simpily put: "),
             tags$ul(
-              tags$li("Conduit handles the resource-intensive processing of the metaproteomics data and takes care of formatting everything."),
-              tags$li(strong("Conduit-GUI lets you easily answer experimental questions!"))
+              tags$li("Conduit-Ascent tackles the heavy lifting on the climb"),
+              tags$li(strong("Conduit-Summit lets you take in the view from the top!"))
             )
           )
         )

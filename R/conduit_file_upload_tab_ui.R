@@ -4,8 +4,8 @@ conduit_file_upload_tab_ui = function(){
     # Main body where the user will upload files.
     # Description of Conduit-GUI usage with hyperlink
     h3(
-      "Conduit-GUI uses the file created by ",
-      a("Conduit", href = "https://github.com/baynec2/conduit")
+      "Conduit-Summit uses the file created by ",
+      a("Conduit-Ascent", href = "https://github.com/baynec2/conduit-ascent")
     ),
     fileInput("conduit.rds", "Upload Conduit .rds File", accept = ".rds"),
     # Bottom Box that will show the user what they have uploaded
@@ -48,12 +48,7 @@ conduit_file_upload_tab_ui = function(){
       )
     ),
     fluidRow(
-      selectInput("pg_to_consider", "Select Protein Grouping To Consider",
-                  choices = c("multiple_proteins_in_group", "one_protein_in_group"))
-    ),
-
-    fluidRow(
-      box(title = "Percent of Detected Proteins Taxonomic Tree",
+      box(title = "Taxonomic Tree by Coverage",
           width = 12,
           solidHeader = TRUE,
           status = "primary",
@@ -65,7 +60,7 @@ conduit_file_upload_tab_ui = function(){
           )
     ),
     fluidRow(
-        box(title = "Protein Taxonomy Table",
+        box(title = "Coverage per Species",
             status = "primary",
             solidHeader = TRUE,
             width = NULL,
