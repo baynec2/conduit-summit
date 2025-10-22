@@ -12,9 +12,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Conduit
+# Conduit-Summit
 
-A modern graphical user interface application built with R Shiny, providing an intuitive and user-friendly experience for managing and interacting with metaproteoemic data processed by [Conduit](https://github.com/baynec2/conduit).
+A modern graphical user interface application built with R Shiny, providing an intuitive and user-friendly experience for managing and interacting with metaproteomic data processed by [Conduit-Ascent](https://github.com/baynec2/conduit-ascent).
 
 ## Features
 

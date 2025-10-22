@@ -62,10 +62,13 @@ ui <- shinydashboardPlus::dashboardPage(
     tabItems(
       conduit_about_tab_ui(),
       conduit_file_upload_tab_ui(),
+      conduit_diann_qc_tab_ui(),
       conduit_metadata_tab_ui(),
       conduit_filter_data_tab_ui(),
       conduit_analysis_tab_ui(),
+      conduit_traverse_tab_ui(),
       conduit_enrichment_tab_ui(),
+      conduit_pathway_tab_ui(),
       conduit_help_tab_ui()
     )
   ),

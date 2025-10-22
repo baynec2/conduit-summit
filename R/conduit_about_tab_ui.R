@@ -23,8 +23,8 @@ conduit_about_tab_ui = function(){
             id = "about_flipbox",
             front = div(
               tags$img(
-                src = "conduit_circle.png",
-                width = "75%", # Adjusted to be responsive with respect to the container
+                src = "conduit-summit.png",
+                width = "150%", # Adjusted to be responsive with respect to the container
                 height = "auto" # Adjust the width to 50% of the container width
               )
             ),

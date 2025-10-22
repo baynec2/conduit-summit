@@ -3,6 +3,7 @@ conduit_analysis_tab_ui <- function() {
     "analysis",
     # Add sub-tabs within Analysis
     tabsetPanel(
+      id = "analysis_tabs",
       tabPanel(
         "QC",
         fluidPage(
@@ -10,7 +11,7 @@ conduit_analysis_tab_ui <- function() {
             tabPanel(
               "Feature Numbers",
               shinycssloaders::withSpinner(
-                plotOutput("feature_number_plot",height = "600px"),
+                plotOutput("feature_number_plot", height = "600px"),
                 type = 8, caption = "The Feature Number Plot is on the Way!",
                 color = "#15131efe"
               )
@@ -130,13 +131,13 @@ conduit_analysis_tab_ui <- function() {
             title = "Plot Options",
             status = "primary",
             solidHeader = TRUE,
-            width = 12,  # Make the box take up the full row
+            width = 12, # Make the box take up the full row
             fluidRow(
               column(
                 width = 3,
                 selectInput("heatmap_plot_type", "Select type of heatmap",
-                            choices = c("static", "interactive"),
-                            selected = "static"
+                  choices = c("static", "interactive"),
+                  selected = "static"
                 )
               ),
               column(
@@ -155,7 +156,7 @@ conduit_analysis_tab_ui <- function() {
           )
         ),
         fluidRow(
-            uiOutput("heatmap_plot_ui"),
+          uiOutput("heatmap_plot_ui"),
         )
       ),
       tabPanel(
@@ -219,10 +220,6 @@ conduit_analysis_tab_ui <- function() {
         fluidRow(
           column(
             width = 6,
-            DT::DTOutput("limma_statistics_table")
-          ),
-          column(
-            width = 6,
             fluidRow(
               box(
                 title = "Volcano Plot Settings",
@@ -231,26 +228,16 @@ conduit_analysis_tab_ui <- function() {
                 status = "primary",
                 fluidRow(
                   column(
-                    width = 4,
+                    width = 6,
                     textInput("limma_volcano_facet_formula",
                       "Faceting Formula",
                       value = "~NULL"
                     )
                   ),
                   column(
-                    width = 4,
+                    width = 6,
                     uiOutput("limma_volcano_color_ui")
                   ),
-                  column(
-                    width = 4,
-                    shiny::sliderInput("volcano_p_threshold",
-                      "p-value threshold",
-                      min = 0,
-                      max = 1,
-                      value = 0.05,
-                      step = 0.01
-                    )
-                  )
                 )
               )
             ),
@@ -267,12 +254,53 @@ conduit_analysis_tab_ui <- function() {
                 )
               )
             )
+          ),
+          column(
+            width = 6,
+            DT::DTOutput("limma_statistics_table")
           )
         ),
         fluidRow(
-          actionButton(
-            "enrichment_analysis_button",
-            "Click to navigate to enrichment analysis page"
+          box(
+            width = 12,
+            title = "Selection Thresholds",
+            solidHeader = TRUE,
+            status = "primary",
+            column(
+              width = 6,
+              shiny::numericInput(
+                "limma_fc_threshold",
+                "LogFC Threshold",
+                value = 0,
+                min =
+                )
+            ),
+            column(
+              width = 6,
+              shiny::sliderInput("limma_p_threshold",
+                "p-value threshold",
+                min = 0,
+                max = 1,
+                value = 0.05,
+                step = 0.01
+              )
+            ),
+            fluidRow(
+              column(
+                6,
+                actionButton(
+                  "enrichment_analysis_button",
+                  "Click For Enrichment Analyis"
+                )
+              ),
+              column(
+                6,
+                actionButton(
+                  "pathway_analysis_button",
+                  "Click For Pathway Analysis"
+                )
+              )
+            )
           )
         ),
         fluidRow(
