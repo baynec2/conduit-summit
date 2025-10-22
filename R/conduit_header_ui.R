@@ -1,6 +1,6 @@
 conduit_header_ui <- function() {
   shinydashboardPlus::dashboardHeader(
-    title = tags$img(src = "conduit_box.png", height = "50px"),
+    title = tags$img(src = "conduit-summit-top.png", height = "50px"),
     leftUi = tagList(
       dropdownBlock(
         title = "Plot Options",
@@ -33,7 +33,7 @@ conduit_header_ui <- function() {
                      max = 50,   # Maximum allowed width
                      step = 0.5  # Increment step
         ),
-        numericInput("plot_height",
+        numericInput("plot_width",
                      "Plot width (inches):",
                      value = 7,  # Default value
                      min = 1,    # Minimum allowed width
@@ -65,6 +65,13 @@ conduit_header_ui <- function() {
         selectInput("normalization_method", "Choose normalization method:",
                     choices = c("none", MsCoreUtils::normalizeMethods()),
                     selected = c("none")
+        ),
+        numericInput(
+          "min_n",
+          "Filter out features with fewer than this many observations",
+          value = 1,
+          min = 1,
+          max = 1000
         )
       )
     )

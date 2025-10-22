@@ -1,12 +1,12 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Conduit
+# Conduit-Summit
 
 A modern graphical user interface application built with R Shiny,
 providing an intuitive and user-friendly experience for managing and
-interacting with metaproteoemic data processed by
-[Conduit](https://github.com/baynec2/conduit).
+interacting with metaproteomic data processed by
+[Conduit-Ascent](https://github.com/baynec2/conduit-ascent).
 
 ## Features
 

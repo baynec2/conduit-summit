@@ -10,7 +10,8 @@ conduit_sidebar_ui = function(){
       menuItem("Analysis", tabName = "analysis", icon = icon("chart-line")),
       menuItem("Traverse",tabName = "traverse", icon = icon("sitemap")),
       menuItem("Help", tabName = "help", icon = icon("question-circle")),
-      menuItem("Enrichment", tabName = "enrichment", icon = icon("network-wired"))
+      menuItem("Enrichment", tabName = "enrichment", icon = icon("network-wired")),
+      menuItem("Pathway",tabName = "pathway", icon = icon("diagram-project"))
       ),
     # Wrap button in a div so it's clickable
       div(
