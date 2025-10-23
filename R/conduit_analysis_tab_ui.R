@@ -8,6 +8,7 @@ conduit_analysis_tab_ui <- function() {
         "QC",
         fluidPage(
           tabsetPanel(
+            id = "qc_sub_tabs",
             tabPanel(
               "Feature Numbers",
               shinycssloaders::withSpinner(
@@ -259,6 +260,13 @@ conduit_analysis_tab_ui <- function() {
             width = 6,
             DT::DTOutput("limma_statistics_table")
           )
+        ),
+        fluidRow(
+          column(offset = 6,
+                 width = 6,
+                 downloadButton("download_limma_stats_table",
+                                "Download Table", class = "btn-block")
+        )
         ),
         fluidRow(
           box(

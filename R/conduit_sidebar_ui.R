@@ -13,10 +13,9 @@ conduit_sidebar_ui = function(){
       menuItem("Enrichment", tabName = "enrichment", icon = icon("network-wired")),
       menuItem("Pathway",tabName = "pathway", icon = icon("diagram-project"))
       ),
-    # Wrap button in a div so it's clickable
-      div(
-        style = "padding: 10px; text-align: center; pointer-events: all;",
-        downloadButton("save_plot", "Save Current Plot", class = "btn-block")
-    )
+      downloadButton("download_current_plot",
+                     "Save Current Plot",
+                     class = "btn-block",
+                     style = "background-color: white; color: black; border: 1px solid #ccc;")
   )
 }
