@@ -66,6 +66,10 @@ conduit_file_upload_tab_ui = function(){
             width = NULL,
             height = "500px",
             DT::dataTableOutput("protein_taxonomy", height = "400px")
+            ),
+        column(
+          width = 12,
+          downloadButton("download_protein_taxonomy", "Download Table", class = "btn-block")
         )
       )
     )

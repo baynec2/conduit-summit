@@ -9,6 +9,10 @@ conduit_diann_qc_tab_ui <- function() {
     ),
     fluidRow(
       dataTableOutput("diann_qc_table")
+    ),
+    column(
+      width = 12,
+      downloadButton("download_diann_stats", "Download Table", class = "btn-block")
     )
   )
 }

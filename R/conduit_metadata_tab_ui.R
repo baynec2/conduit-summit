@@ -60,6 +60,10 @@ conduit_metadata_tab_ui = function(){
                  plotOutput("metadata_distribution_plot")
                )
         )
+      ),
+      column(
+        width = 6,
+        downloadButton("download_colData_table", "Download Table", class = "btn-block")
       )
     )
   )
