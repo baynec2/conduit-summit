@@ -1,20 +1,23 @@
-conduit_about_tab_ui = function(){
+conduit_about_tab_ui <- function() {
   tabItem(
     "about",
     fluidRow(
       # Column for the flip box and information box stacked vertically
       column(
-        width = 8, offset = 2, # Adjust the column width and offset as needed
+        width = 12, # Adjust the column width and offset as needed
         # Custom styles to divide the height equally between logo and info box
         tags$style(
-          "
-        .logo-box {
-          height: 50vh;  /* 50% of the screen height for the logo */
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        "
+          ".logo-box {
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             overflow: visible; /* allow full image to show */
+           }
+           .logo-box img {
+             max-width: 100%;
+             height: auto;
+           }
+           "
         ),
         # Logo section with flip box
         div(
@@ -23,8 +26,8 @@ conduit_about_tab_ui = function(){
             id = "about_flipbox",
             front = div(
               tags$img(
-                src = "conduit_circle.png",
-                width = "75%", # Adjusted to be responsive with respect to the container
+                src = "conduit-summit.png",
+                width = "100%", # Adjusted to be responsive with respect to the container
                 height = "auto" # Adjust the width to 50% of the container width
               )
             ),
@@ -41,7 +44,9 @@ conduit_about_tab_ui = function(){
             width = NULL, # Default width
             solidHeader = TRUE,
             status = "primary", # You can change the status to other options like "warning"
-            p(strong("Conduit-GUI is a tool designed to help analyze metaproteomics data.")),
+            p(strong(
+              "Conduit-GUI is a tool designed to help analyze metaproteomics data."
+            )),
             br(), # Adds space for visual separation
             p("It is a full-featured suite of tools that allows you to:"),
             tags$ul(
@@ -56,12 +61,19 @@ conduit_about_tab_ui = function(){
             br(), # Adds space for visual separation
             p(
               "It operates on the data output from the ",
-              a("snakemake metaproteomics workflow named Conduit", href = "https://github.com/baynec2/conduit")
+              a(
+                "snakemake metaproteomics workflow named Conduit",
+                href = "https://github.com/baynec2/conduit"
+              )
             ),
             p("Simpily put: "),
             tags$ul(
-              tags$li("Conduit handles the resource-intensive processing of the metaproteomics data and takes care of formatting everything."),
-              tags$li(strong("Conduit-GUI lets you easily answer experimental questions!"))
+              tags$li(
+                "Conduit handles the resource-intensive processing of the metaproteomics data and takes care of formatting everything."
+              ),
+              tags$li(strong(
+                "Conduit-GUI lets you easily answer experimental questions!"
+              ))
             )
           )
         )

@@ -1,4 +1,4 @@
-conduit_file_upload_tab_ui = function(){
+conduit_file_upload_tab_ui <- function() {
   tabItem(
     "file_upload",
     # Main body where the user will upload files.
@@ -17,30 +17,38 @@ conduit_file_upload_tab_ui = function(){
       status = "info",
       footer = fluidRow(
         column(
-          width = 4,
+          width = 3,
           descriptionBlock(
             text = "# Samples",
-            header = textOutput("num_samples"),  # Corrected to textOutput directly
+            header = textOutput("num_samples"), # Corrected to textOutput directly
             rightBorder = TRUE,
             marginBottom = FALSE
           )
         ),
         column(
-          width = 4,
+          width = 3,
           descriptionBlock(
             text = "# of Species Detected",
-            header =textOutput("num_species_detected"),
-            number = textOutput("per_species_detected"),# Corrected to the correct output
+            header = textOutput("num_species_detected"),
+            number = textOutput("per_species_detected"), # Corrected to the correct output
             rightBorder = FALSE,
             marginBottom = FALSE
           )
         ),
         column(
-          width = 4,
+          width = 3,
           descriptionBlock(
             text = "# of Proteins Detected",
             header = textOutput("num_proteins_detected"),
-            number = textOutput("per_proteins_detected"),  # Corrected to the correct output
+            rightBorder = FALSE,
+            marginBottom = FALSE
+          )
+        ),
+        column(
+          width = 3,
+          descriptionBlock(
+            text = "# of Peptides Detected",
+            header = textOutput("num_peptides_detected"),
             rightBorder = FALSE,
             marginBottom = FALSE
           )
@@ -48,30 +56,95 @@ conduit_file_upload_tab_ui = function(){
       )
     ),
     fluidRow(
-      selectInput("pg_to_consider", "Select Protein Grouping To Consider",
-                  choices = c("multiple_proteins_in_group", "one_protein_in_group"))
-    ),
-
-    fluidRow(
-      box(title = "Percent of Detected Proteins Taxonomic Tree",
-          width = 12,
-          solidHeader = TRUE,
-          status = "primary",
-          shinycssloaders::withSpinner(
-            plotOutput("taxa_tree_plot", width = "100%",height = "900px"),
-            type = 8,caption = "Please wait, the taxonomic tree is loading...",
-            color = "#15131efe"
+      box(
+        title = "Taxa Tree Plot Options",
+        width = 12,
+        solidHeader = TRUE,
+        status = "primary",
+        column(
+          width = 4,
+          selectInput(
+            "taxa_tree_filter",
+            "Select Taxonomic Level to Show",
+            choices = c(
+              "domain",
+              "kingdom",
+              "phylum",
+              "class",
+              "order",
+              "family",
+              "genus",
+              "species"
+            ),
+            selected = "species"
           )
+        ),
+        column(
+          width = 4,
+          selectInput(
+            "taxa_tree_color",
+            "Select variable to color by",
+            choices = c(
+              "domain",
+              "kingdom",
+              "phylum",
+              "class",
+              "order",
+              "family",
+              "genus",
+              "species",
+              "download_info"
+            ),
+            selected = "download_info"
           )
+        ),
+        column(
+          width = 4,
+          selectInput(
+            "taxa_tree_layout",
+            "Select Layout of Plot",
+            choices = c(
+              "automatic",
+              "reingold-tilford",
+              "davidson-harel",
+              "gem",
+              "graphopt",
+              "mds",
+              "fruchterman-reingold",
+              "kamada-kawai",
+              "large-graph"
+            ),
+            selected = "automatic"
+          )
+        )
+      )
     ),
     fluidRow(
-        box(title = "Protein Taxonomy Table",
-            status = "primary",
-            solidHeader = TRUE,
-            width = NULL,
-            height = "500px",
-            DT::dataTableOutput("protein_taxonomy", height = "400px")
+      box(
+        title = "Taxonomic Tree by Protein Coverage",
+        width = 12,
+        solidHeader = TRUE,
+        status = "primary",
+        shinycssloaders::withSpinner(
+          plotOutput("taxa_tree_plot", width = "100%", height = "900px"),
+          type = 8,
+          caption = "Please wait, the taxonomic tree is loading...",
+          color = "#15131efe"
+        )
+      )
+    ),
+    fluidRow(
+      DT::DTOutput("protein_taxonomy", height = "400px")
+    ),
+    fluidRow(
+      column(
+        width = 12,
+        downloadButton(
+          "download_protein_taxonomy",
+          "Download Table",
+          class = "btn-block"
         )
       )
     )
+  )
 }
