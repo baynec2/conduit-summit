@@ -10,25 +10,29 @@ server <- function(input, output, session) {
   # Hide the Enrichment menu item immediately after load
   # Delay hiding until sidebar is rendered
   shiny::observe({
-    shinyjs::runjs("
+    shinyjs::runjs(
+      "
       setTimeout(function() {
         var el = document.querySelector('a[data-value=\"enrichment\"]');
         if (el) {
           el.parentElement.style.display = 'none';
         }
       }, 500);
-    ")
+    "
+    )
   })
   # Hide the Pathway Tab
   shiny::observe({
-    shinyjs::runjs("
+    shinyjs::runjs(
+      "
     setTimeout(function() {
       var pathwayTab = document.querySelector('a[data-value=\"pathway\"]');
       if (pathwayTab) {
         pathwayTab.parentElement.style.display = 'none';
       }
     }, 500);
-  ")
+  "
+    )
   })
 
   # Show progress using Hostess on load
@@ -53,17 +57,35 @@ server <- function(input, output, session) {
   ## Initially Hide Tabs ##
   # Disable sidebar tabs at startup
   shiny::observe({
-    tabs_to_disable <- c("view_metadata", "filter_data", "analysis", "diann_qc", "traverse")
+    tabs_to_disable <- c(
+      "view_metadata",
+      "filter_data",
+      "analysis",
+      "diann_qc",
+      "traverse"
+    )
     lapply(tabs_to_disable, function(tab) {
-      shinyjs::runjs(sprintf("$('.sidebar-menu a[data-value=\"%s\"]').addClass('disabled-tab');", tab))
+      shinyjs::runjs(sprintf(
+        "$('.sidebar-menu a[data-value=\"%s\"]').addClass('disabled-tab');",
+        tab
+      ))
     })
   })
 
   shiny::observe({
     req(input$conduit.rds) # Only proceeds when file is uploaded
-    tabs_to_enable <- c("view_metadata", "filter_data", "analysis", "diann_qc", "traverse")
+    tabs_to_enable <- c(
+      "view_metadata",
+      "filter_data",
+      "analysis",
+      "diann_qc",
+      "traverse"
+    )
     lapply(tabs_to_enable, function(tab) {
-      shinyjs::runjs(sprintf("$('.sidebar-menu a[data-value=\"%s\"]').removeClass('disabled-tab');", tab))
+      shinyjs::runjs(sprintf(
+        "$('.sidebar-menu a[data-value=\"%s\"]').removeClass('disabled-tab');",
+        tab
+      ))
     })
   })
 
@@ -104,7 +126,6 @@ server <- function(input, output, session) {
     nrow(colData()) # Number of samples
   })
 
-
   output$num_species_detected <- renderText({
     req(conduit_obj())
     metrics()$protein_coverage_species |>
@@ -123,7 +144,6 @@ server <- function(input, output, session) {
     req(rowData())
     nrow(rowData())
   })
-
 
   output$per_proteins_detected <- renderText({
     req(conduit_obj())
@@ -176,9 +196,14 @@ server <- function(input, output, session) {
     names(qf())
   })
 
-  observeEvent(qf(),
+  observeEvent(
+    qf(),
     {
-      default_choice <- if ("protein_groups" %in% possible_assays()) "protein_groups" else possible_assays()[[1]]
+      default_choice <- if ("protein_groups" %in% possible_assays()) {
+        "protein_groups"
+      } else {
+        possible_assays()[[1]]
+      }
       if (is.null(selected_assay())) {
         selected_assay(default_choice)
       }
@@ -189,7 +214,9 @@ server <- function(input, output, session) {
   output$agg_level_choices_ui <- renderUI({
     req(conduit_obj(), qf())
 
-    selectInput("agg_level_choices", "Choose QFeatures Assay",
+    selectInput(
+      "agg_level_choices",
+      "Choose QFeatures Assay",
       choices = possible_assays(),
       selected = selected_assay()
     )
@@ -204,7 +231,8 @@ server <- function(input, output, session) {
   ################################################################################
   output$diann_qc_columns_ui <- renderUI({
     req(metrics()) # Ensure metrics() is available before proceeding
-    selectInput("diann_qc_metric",
+    selectInput(
+      "diann_qc_metric",
       "Choose QC metric to plot",
       choices = names(metrics()$diann_stats), # Ensure colData() is reactive
       selected = "Proteins.Identified"
@@ -232,7 +260,6 @@ server <- function(input, output, session) {
     diann_stats()
   })
 
-
   # Download Table
   output$download_diann_stats <- downloadHandler(
     filename = function() {
@@ -256,7 +283,6 @@ server <- function(input, output, session) {
     sum(sapply(colData(), function(x) !is.numeric(x)))
   })
 
-
   output$colData <- DT::renderDataTable({
     req(colData())
     DT::datatable(
@@ -278,7 +304,8 @@ server <- function(input, output, session) {
 
   output$metadata_variable_choices_to_plot_ui <- renderUI({
     req(colData()) # Ensure colData() is available before proceeding
-    selectInput("metadata_variable_choices_to_plot",
+    selectInput(
+      "metadata_variable_choices_to_plot",
       "Choose variable to plot",
       choices = names(colData()), # Ensure colData() is reactive
       selected = NULL
@@ -291,7 +318,10 @@ server <- function(input, output, session) {
       input$metadata_variable_choices_to_plot,
       colData()
     ) # Ensure colData() is available before proceeding
-    conduitR::plot_colData_distribution(conduit_obj(), input$metadata_variable_choices_to_plot)
+    conduitR::plot_colData_distribution(
+      conduit_obj(),
+      input$metadata_variable_choices_to_plot
+    )
   })
 
   output$metadata_distribution_plot <- renderPlot({
@@ -317,9 +347,13 @@ server <- function(input, output, session) {
     req(input$conduit.rds, sample_vars(), colData()) # Ensure sample variables exist
     lapply(sample_vars(), function(var) {
       vals <- unique(colData()[[var]]) # Use reactive colData()
-      pickerInput(paste0("sample_", var),
-        label = var, choices = vals,
-        selected = vals, multiple = TRUE, options = list(`actions-box` = TRUE)
+      pickerInput(
+        paste0("sample_", var),
+        label = var,
+        choices = vals,
+        selected = vals,
+        multiple = TRUE,
+        options = list(`actions-box` = TRUE)
       )
     })
   })
@@ -334,10 +368,16 @@ server <- function(input, output, session) {
     }
 
     lapply(feature_vars(), function(var) {
-      vals <- unique(SummarizedExperiment::rowData(qf()[[selected_assay()]])[[var]])
-      pickerInput(paste0("feature_", var),
-        label = var, choices = vals,
-        selected = vals, multiple = TRUE, options = list(`actions-box` = TRUE)
+      vals <- unique(SummarizedExperiment::rowData(qf()[[selected_assay()]])[[
+        var
+      ]])
+      pickerInput(
+        paste0("feature_", var),
+        label = var,
+        choices = vals,
+        selected = vals,
+        multiple = TRUE,
+        options = list(`actions-box` = TRUE)
       )
     })
   })
@@ -352,7 +392,8 @@ server <- function(input, output, session) {
     for (var in sample_vars()) {
       sel <- input[[paste0("sample_", var)]]
       if (!is.null(sel) && length(sel) > 0) {
-        keep_samples <- SummarizedExperiment::colData(qf_filtered)[[var]] %in% sel # ✅ Keep colData() as originally written
+        keep_samples <- SummarizedExperiment::colData(qf_filtered)[[var]] %in%
+          sel # ✅ Keep colData() as originally written
         if (!any(keep_samples)) {
           return(NULL)
         } # Prevent errors if no samples are selected
@@ -385,7 +426,6 @@ server <- function(input, output, session) {
     qf_filtered # ✅ Return filtered QFeatures object
   })
 
-
   # Show filtered QFeatures object structure (instead of datatable)
   output$filtered_qfeatures <- renderPrint({
     req(filtered_qf())
@@ -397,17 +437,26 @@ server <- function(input, output, session) {
   final_qf <- reactive({
     req(
       filtered_qf(),
+      selected_assay(),
       input$log_base,
       input$imputation_method,
       input$normalization_method
     )
 
     message <- HTML(paste0(
-      "<p>Your <b>", selected_assay(), "</b> data is being processed with the following settings:</p>",
+      "<p>Your <b>",
+      selected_assay(),
+      "</b> data is being processed with the following settings:</p>",
       "<ul>",
-      "<li><b>Log base:</b> ", input$log_base, "</li>",
-      "<li><b>Imputation method:</b> ", input$imputation_method, "</li>",
-      "<li><b>Normalization method:</b> ", input$normalization_method, "</li>",
+      "<li><b>Log base:</b> ",
+      input$log_base,
+      "</li>",
+      "<li><b>Imputation method:</b> ",
+      input$imputation_method,
+      "</li>",
+      "<li><b>Normalization method:</b> ",
+      input$normalization_method,
+      "</li>",
       "</ul>",
       "<p>Please wait while the data is being processed...</p>",
       "<p><i>If you’d like to change any of the options above, you can do so from the tabs at the top of the screen.</i></p>"
@@ -425,15 +474,30 @@ server <- function(input, output, session) {
     )
 
     # Compute updated QFeatures object
-    new_qf <- conduitR::add_log_imputed_norm_assays(
+    new_qf <- conduitR::add_log_imputed_norm_assay(
       filtered_qf(),
+      assay = selected_assay(),
       base = input$log_base,
       impute_method = input$imputation_method,
       norm_method = input$normalization_method
     )
 
     # Store relative abundance information for the taxonomic data
-    new_qf <- conduitR::add_relative_abundance_assays(new_qf)
+    if (
+      selected_assay() %in%
+        c(
+          "domain",
+          "kingdom",
+          "phylum",
+          "class",
+          "order",
+          "family",
+          "genus",
+          "species"
+        )
+    ) {
+      new_qf <- conduitR::add_relative_abundance_assay(new_qf, selected_assay())
+    }
 
     # removeModal()  # Done processing
     shinyalert::closeAlert()
@@ -455,7 +519,13 @@ server <- function(input, output, session) {
     if (input$normalization_method == "none") {
       paste0(selected_assay(), "_log", input$log_base, "_imputed")
     } else {
-      paste0(selected_assay(), "_log", input$log_base, "_imputed_", input$normalization_method)
+      paste0(
+        selected_assay(),
+        "_log",
+        input$log_base,
+        "_imputed_",
+        input$normalization_method
+      )
     }
   })
 
@@ -476,7 +546,6 @@ server <- function(input, output, session) {
   ##############################################################################
   ### Feature number plot ###
 
-
   feature_number_plot <- reactive({
     req(final_qf(), selected_assay())
     DEP::plot_coverage(final_qf()[[selected_assay()]]) +
@@ -491,7 +560,9 @@ server <- function(input, output, session) {
   # UI for selecting colData color variables
   output$miss_val_heatmap_col_color_choices_ui <- renderUI({
     req(final_colData_names())
-    selectInput("miss_val_heatmap_col_color_choices", "Choose columns to color",
+    selectInput(
+      "miss_val_heatmap_col_color_choices",
+      "Choose columns to color",
       choices = c(final_colData_names(), NULL),
       selected = NULL,
       multiple = TRUE
@@ -501,7 +572,9 @@ server <- function(input, output, session) {
   # UI for selecting rowData color variables
   output$miss_val_heatmap_row_color_choices_ui <- renderUI({
     req(final_rowData_names())
-    selectInput("miss_val_heatmap_row_color_choices", "Choose row annotations",
+    selectInput(
+      "miss_val_heatmap_row_color_choices",
+      "Choose row annotations",
       choices = c(final_rowData_names(), NULL),
       selected = NULL,
       multiple = TRUE
@@ -510,7 +583,8 @@ server <- function(input, output, session) {
 
   # Creating missing value plot
   missing_value_plot <- reactive({
-    conduitR::plot_missing_val_heatmap(final_qf(),
+    conduitR::plot_missing_val_heatmap(
+      final_qf(),
       assay_name = selected_(),
       col_color_variables = input$miss_val_heatmap_col_color_choices,
       row_color_variables = input$miss_val_heatmap_row_color_choices,
@@ -527,7 +601,9 @@ server <- function(input, output, session) {
   # UI for selecting color variables
   output$sample_cor_heatmap_color_choices_ui <- renderUI({
     req(final_colData_names())
-    selectInput("sample_cor_heatmap_color_choices", "Choose annotation",
+    selectInput(
+      "sample_cor_heatmap_color_choices",
+      "Choose annotation",
       choices = final_colData_names(),
       selected = NULL,
       multiple = TRUE
@@ -535,10 +611,10 @@ server <- function(input, output, session) {
   })
   # Creating Plot
   sample_cor_heatmap <- reactive({
-    conduitR::plot_sample_cor_heatmap(final_qf(),
+    conduitR::plot_sample_cor_heatmap(
+      final_qf(),
       assay_name = processed_assay(),
-      sample_annotation_variables =
-        input$sample_cor_heatmap_color_choices
+      sample_annotation_variables = input$sample_cor_heatmap_color_choices
     )
   })
 
@@ -557,7 +633,9 @@ server <- function(input, output, session) {
   # Rendering the UI Color Choice Selection
   output$density_plot_color_choice_ui <- renderUI({
     req(final_colData_names())
-    selectInput("density_plot_color_choice", "Choose color variable",
+    selectInput(
+      "density_plot_color_choice",
+      "Choose color variable",
       choices = final_colData_names(),
       selected = ""
     )
@@ -565,9 +643,15 @@ server <- function(input, output, session) {
 
   # Creating Plot
   density_plot <- reactive({
-    req(final_qf(), selected_assay(), input$log_base, input$density_plot_color_choice)
+    req(
+      final_qf(),
+      selected_assay(),
+      input$log_base,
+      input$density_plot_color_choice
+    )
 
-    conduitR::plot_density(final_qf(),
+    conduitR::plot_density(
+      final_qf(),
       assay_name = selected_assay(),
       input$log_base,
       input$density_plot_color_choice
@@ -584,7 +668,9 @@ server <- function(input, output, session) {
   # Rendering the UI Color Choice Selection
   output$pca_plot_color_choice_ui <- renderUI({
     req(final_colData_names())
-    selectInput("pca_plot_color_choice", "Choose color variable",
+    selectInput(
+      "pca_plot_color_choice",
+      "Choose color variable",
       choices = c("none" = "", final_colData_names(), NULL),
       selected = ""
     )
@@ -593,14 +679,18 @@ server <- function(input, output, session) {
   # Rendering the UI Shape Choice Selection
   output$pca_plot_shape_choice_ui <- renderUI({
     req(final_colData_names())
-    selectInput("pca_plot_shape_choice", "Choose shape variable",
-      choices = c("none" = "", final_colData_names()), NULL,
+    selectInput(
+      "pca_plot_shape_choice",
+      "Choose shape variable",
+      choices = c("none" = "", final_colData_names()),
+      NULL,
       selected = ""
     )
   })
 
   pca_plot <- reactive({
-    conduitR::plot_biplot(final_qf(),
+    conduitR::plot_biplot(
+      final_qf(),
       assay_name = processed_assay(),
       color = input$pca_plot_color_choice,
       shape = input$pca_plot_shape_choice,
@@ -619,7 +709,8 @@ server <- function(input, output, session) {
   # UI for selecting number of variables:
   output$heatmap_feature_number_ui <- renderUI({
     req(final_qf(), processed_assay())
-    sliderInput("heatmap_feature_number",
+    sliderInput(
+      "heatmap_feature_number",
       "Max N Of Rows To Show",
       min = 1,
       max = nrow(SummarizedExperiment::rowData(final_qf()[[processed_assay()]])),
@@ -630,7 +721,9 @@ server <- function(input, output, session) {
   # UI for selecting color variables
   output$heatmap_col_color_choices_ui <- renderUI({
     req(final_colData_names())
-    selectInput("heatmap_col_color_choices", "Choose columns to color",
+    selectInput(
+      "heatmap_col_color_choices",
+      "Choose columns to color",
       choices = final_colData_names(),
       selected = NULL,
       multiple = TRUE
@@ -639,33 +732,33 @@ server <- function(input, output, session) {
 
   output$heatmap_row_color_choices_ui <- renderUI({
     req(final_rowData_names())
-    selectInput("heatmap_row_color_choices", "Choose row annotations",
+    selectInput(
+      "heatmap_row_color_choices",
+      "Choose row annotations",
       choices = final_rowData_names(),
       selected = NULL,
       multiple = TRUE
     )
   })
 
-
-
   # Dynamically swap between interactive and static outputs
   output$heatmap_plot_ui <- renderUI({
     if (input$heatmap_plot_type == "interactive") {
       shinycssloaders::withSpinner(
         plotly::plotlyOutput("heatmap_plotly", height = "600px"),
-        type = 8, caption = "One interactive heatmap coming up...",
+        type = 8,
+        caption = "One interactive heatmap coming up...",
         color = "#15131efe"
       )
     } else {
       shinycssloaders::withSpinner(
         plotOutput("heatmap_plot_static", height = "600px"),
-        type = 8, caption = "One static heatmap is on the way...",
+        type = 8,
+        caption = "One static heatmap is on the way...",
         color = "#15131efe"
       )
     }
   })
-
-
 
   heatmap_qf <- reactive({
     req(final_qf(), processed_assay(), input$heatmap_feature_number)
@@ -728,11 +821,24 @@ server <- function(input, output, session) {
 
   relative_abundance_plot <- reactive({
     req(final_qf(), relative_abundance_assay())
-    if (relative_abundance_assay() %in% paste0(
-      c("domain", "kingdom", "phylum", "class", "order", "family", "geuns", "species"),
-      "_rel_abundance"
-    )) {
-      conduitR::plot_relative_abundance(final_qf(),
+    if (
+      relative_abundance_assay() %in%
+        paste0(
+          c(
+            "domain",
+            "kingdom",
+            "phylum",
+            "class",
+            "order",
+            "family",
+            "geuns",
+            "species"
+          ),
+          "_rel_abundance"
+        )
+    ) {
+      conduitR::plot_relative_abundance(
+        final_qf(),
         assay_name = relative_abundance_assay(),
         facet_formula = input$relative_abundance_plot_formula
       )
@@ -740,7 +846,15 @@ server <- function(input, output, session) {
       message <- "Relative Abundance Plots only Supported For Taxonomic Aggregations"
       ggplot2::ggplot() +
         ggplot2::theme_void() + # Remove all axes and background
-        ggplot2::annotate("text", x = 0.5, y = 0.5, label = message, size = 6, hjust = 0.5, vjust = 0.5) +
+        ggplot2::annotate(
+          "text",
+          x = 0.5,
+          y = 0.5,
+          label = message,
+          size = 6,
+          hjust = 0.5,
+          vjust = 0.5
+        ) +
         ggplot2::xlim(0, 1) +
         ggplot2::ylim(0, 1)
     }
@@ -768,10 +882,16 @@ server <- function(input, output, session) {
 
   # Perform and Process Statistics
   limma_stats_results <- reactive({
-    req(final_qf(), processed_assay(), input$limma_formula, input$limma_contrast)
+    req(
+      final_qf(),
+      processed_assay(),
+      input$limma_formula,
+      input$limma_contrast
+    )
 
     # Getting the results of the statistics
-    results <- conduitR::perform_limma_analysis(final_qf(),
+    results <- conduitR::perform_limma_analysis(
+      final_qf(),
       assay_name = processed_assay(),
       formula = as.formula(input$limma_formula),
       contrast = input$limma_contrast
@@ -788,7 +908,8 @@ server <- function(input, output, session) {
       limma_stats_results() |>
         dplyr::mutate(dplyr::across(
           where(is.character),
-          ~ ifelse(nchar(.) > 15,
+          ~ ifelse(
+            nchar(.) > 15,
             paste0("<span title='", ., "'>", substr(., 1, 15), "...</span>"),
             .
           )
@@ -820,7 +941,8 @@ server <- function(input, output, session) {
   # Render options for coloring the points on the graph.
   output$limma_volcano_color_ui <- renderUI({
     req(final_rowData_names())
-    selectInput("limma_volcano_color",
+    selectInput(
+      "limma_volcano_color",
       "Choose how the points are colored",
       choices = c("none" = "", final_rowData_names()),
       selected = "",
@@ -870,7 +992,9 @@ server <- function(input, output, session) {
   # X axis
   output$selected_feature_plot_x_axis_ui <- renderUI({
     req(final_colData_and_rowData_names())
-    selectInput("selected_feature_plot_x_axis", "Choose x axis",
+    selectInput(
+      "selected_feature_plot_x_axis",
+      "Choose x axis",
       choices = final_colData_and_rowData_names(),
       multiple = FALSE
     )
@@ -878,7 +1002,8 @@ server <- function(input, output, session) {
 
   # Facet wrap
   output$selected_feature_plot_facet_formula_ui <- renderUI({
-    textInput("selected_feature_plot_facet_formula",
+    textInput(
+      "selected_feature_plot_facet_formula",
       "Choose facet formula",
       value = "~ NULL"
     )
@@ -887,7 +1012,9 @@ server <- function(input, output, session) {
   # Color
   output$selected_feature_plot_color_ui <- renderUI({
     req(final_colData_and_rowData_names())
-    selectInput("selected_feature_plot_color", "Choose color",
+    selectInput(
+      "selected_feature_plot_color",
+      "Choose color",
       choices = c("none" = "", final_colData_and_rowData_names()),
       multiple = FALSE,
       selected = ""
@@ -897,7 +1024,9 @@ server <- function(input, output, session) {
   # Shape
   output$selected_feature_plot_shape_ui <- renderUI({
     req(final_colData_and_rowData_names())
-    selectInput("selected_feature_plot_shape", "Choose shape",
+    selectInput(
+      "selected_feature_plot_shape",
+      "Choose shape",
       choices = c("none" = "", final_colData_and_rowData_names()),
       multiple = FALSE,
       selected = ""
@@ -926,8 +1055,8 @@ server <- function(input, output, session) {
       input$selected_feature_plot_facet_formula
     )
 
-
-    conduitR::plot_selected_features(final_qf(),
+    conduitR::plot_selected_features(
+      final_qf(),
       assay_name = processed_assay(),
       features = selected_features(),
       x_axis = input$selected_feature_plot_x_axis,
@@ -953,14 +1082,21 @@ server <- function(input, output, session) {
   output$enrichment_plot_options_ui <- renderUI({
     req(input$enrichment_type)
     if (input$enrichment_type == "gsea") {
-      selectInput("enrichment_plot_type", "Choose Enrichment Plot Type",
+      selectInput(
+        "enrichment_plot_type",
+        "Choose Enrichment Plot Type",
         choices = c("ridgeplot", "dotplot", "treeplot", "upsetplot"),
         selected = "ridgeplot"
       )
     } else if (input$enrichment_type == "ora") {
-      selectInput("enrichment_plot_type", "Choose Enrichment Plot Type",
+      selectInput(
+        "enrichment_plot_type",
+        "Choose Enrichment Plot Type",
         choices = c(
-          "barplot", "dotplot", "treeplot", "upsetplot",
+          "barplot",
+          "dotplot",
+          "treeplot",
+          "upsetplot",
           "cnetplot"
         ),
         selected = "barplot"
@@ -971,14 +1107,16 @@ server <- function(input, output, session) {
   output$enrichment_direction_ui <- renderUI({
     req(input$enrichment_type)
     if (input$enrichment_type == "gsea") {
-      selectInput("enrichment_direction",
+      selectInput(
+        "enrichment_direction",
         "Direction of Change for Enrichment",
         choices = c("both"),
         multiple = FALSE,
         selected = "both"
       )
     } else if (input$enrichment_type == "ora") {
-      selectInput("enrichment_direction",
+      selectInput(
+        "enrichment_direction",
         "Direction of Change for Enrichment",
         choices = c("up", "down"),
         multiple = FALSE,
@@ -1081,7 +1219,8 @@ server <- function(input, output, session) {
       dplyr::select(organism_id, species)
 
     # Joining together
-    kegg_pathway_with_taxa <- dplyr::right_join(taxonomy,
+    kegg_pathway_with_taxa <- dplyr::right_join(
+      taxonomy,
       kegg_pathways,
       by = "organism_id"
     ) |>
@@ -1092,12 +1231,13 @@ server <- function(input, output, session) {
 
     names(possible_kegg_ids) <- kegg_pathway_with_taxa$id
 
-    selectInput("selected_kegg_pathway", "Select Kegg Pathway To Show",
+    selectInput(
+      "selected_kegg_pathway",
+      "Select Kegg Pathway To Show",
       choices = possible_kegg_ids,
       multiple = FALSE
     )
   })
-
 
   pathway_plot <- reactive({
     req(
@@ -1180,7 +1320,6 @@ server <- function(input, output, session) {
     plot(conduit_obj()@QFeatures, interactive = TRUE)
   })
 
-
   output$traverse_info <- DT::renderDT({
     req(qf())
     req(input$traverse_features)
@@ -1193,10 +1332,12 @@ server <- function(input, output, session) {
 
   traverse_plot <- reactive({
     p1 <- traverse_data() |>
-      ggplot2::ggplot(ggplot2::aes(!!rlang::sym(input$traverse_xaxis), y = intensity)) +
+      ggplot2::ggplot(ggplot2::aes(
+        !!rlang::sym(input$traverse_xaxis),
+        y = intensity
+      )) +
       ggplot2::geom_point() +
       ggplot2::ylab(paste(input$traverse_assay, " Intensity"))
-
 
     p1
   })
@@ -1224,7 +1365,6 @@ server <- function(input, output, session) {
     final_colData_names()[sapply(final_colData(), function(x) !is.numeric(x))]
   })
 
-
   # UI For Selecting the Outcome variable
   observe({
     req(non_numeric_colData_names())
@@ -1238,19 +1378,34 @@ server <- function(input, output, session) {
 
   predict_classification_list <- eventReactive(input$run_classification_model, {
     req(
-      final_qf(), processed_assay(), input$outcome_var,
-      input$split_ratio, input$model_type, input$cv_folds, input$random_seed
+      final_qf(),
+      processed_assay(),
+      input$outcome_var,
+      input$split_ratio,
+      input$model_type,
+      input$cv_folds,
+      input$random_seed
     )
 
     set.seed(random_seed)
 
     message <- HTML(paste0(
-      "<p>Your <b>", selected_assay(), "</b> data is being used to generate a classification model with the following parameters:</p>",
+      "<p>Your <b>",
+      selected_assay(),
+      "</b> data is being used to generate a classification model with the following parameters:</p>",
       "<ul>",
-      "<li><b>Model Type:</b> ", input$model_type, "</li>",
-      "<li><b>Outcome Variable:</b> ", input$outcome_var, "</li>",
-      "<li><b>Train/Test Split Percentage:</b> ", input$split_ratio, "</li>",
-      "<li><b>Cross-Validation Folds:</b> ", input$cv_folds, "</li>",
+      "<li><b>Model Type:</b> ",
+      input$model_type,
+      "</li>",
+      "<li><b>Outcome Variable:</b> ",
+      input$outcome_var,
+      "</li>",
+      "<li><b>Train/Test Split Percentage:</b> ",
+      input$split_ratio,
+      "</li>",
+      "<li><b>Cross-Validation Folds:</b> ",
+      input$cv_folds,
+      "</li>",
       "</ul>",
       "<p>Please wait while the model is generated...</p>"
     ))
@@ -1323,15 +1478,19 @@ server <- function(input, output, session) {
   # Dynamically render the slider only when data is ready
   output$features_to_show_slider <- renderUI({
     req(predict_classification_list())
-    max_val <- max(length(predict_classification_list()$importance$feature), na.rm = TRUE)
+    max_val <- max(
+      length(predict_classification_list()$importance$feature),
+      na.rm = TRUE
+    )
 
-    sliderInput("features_to_show_slider_ui", "Select rank of features to show",
+    sliderInput(
+      "features_to_show_slider_ui",
+      "Select rank of features to show",
       min = 1,
       max = max_val,
       value = c(0, max_val)
     )
   })
-
 
   # Plotting feature importance
   output$feature_importance_plot <- renderPlot({
@@ -1346,8 +1505,6 @@ server <- function(input, output, session) {
     )
   })
 
-
-
   ##############################################################################
   # Handling Plot Downloads
   ##############################################################################
@@ -1360,7 +1517,8 @@ server <- function(input, output, session) {
 
     # --- Non-analysis sidebar tabs ---
     if (main_tab != "analysis") {
-      switch(main_tab,
+      switch(
+        main_tab,
         "file_upload" = taxa_tree_plot(),
         "diann_qc" = diann_qc_plot(),
         "view_metadata" = metadata_distribution_plot(),
@@ -1369,14 +1527,14 @@ server <- function(input, output, session) {
         "traverse" = traverse_plot(),
         NULL
       )
-    }
-
-    # --- Analysis tab and nested subtabs ---
-    else if (main_tab == "analysis" && !is.null(analysis_tab)) {
-      switch(analysis_tab,
+    } else if (main_tab == "analysis" && !is.null(analysis_tab)) {
+      # --- Analysis tab and nested subtabs ---
+      switch(
+        analysis_tab,
         "QC" = {
           req(input$qc_sub_tabs)
-          switch(input$qc_sub_tabs,
+          switch(
+            input$qc_sub_tabs,
             "Feature Numbers" = feature_number_plot(),
             "Missing Values" = missing_value_plot(),
             "Sample Correlation" = sample_cor_heatmap(),
@@ -1391,7 +1549,8 @@ server <- function(input, output, session) {
         "Statistics" = limma_volcano_plot(),
         "Classification Prediction" = {
           req(input$class_sub_tabs)
-          switch(input$class_sub_tabs,
+          switch(
+            input$class_sub_tabs,
             "Confusion Matrix" = confusion_matrix_plot_reactive(),
             "Test Plot" = test_plot_reactive(),
             "Train Plot" = train_plot_reactive(),
@@ -1408,10 +1567,10 @@ server <- function(input, output, session) {
   # Handling the download of the selected plots.
   output$download_current_plot <- downloadHandler(
     filename = function() {
-      if(input$main_tabs == "analysis"){
+      if (input$main_tabs == "analysis") {
         paste0(input$analysis_tabs, ".", input$plot_file_format)
       } else {
-        paste0(input$main_tabs,".", input$plot_file_format)
+        paste0(input$main_tabs, ".", input$plot_file_format)
       }
     },
     content = function(file) {
@@ -1429,7 +1588,6 @@ server <- function(input, output, session) {
           height = input$plot_height,
           device = fmt
         )
-
       } else if ("pheatmap" %in% class(plot_obj)) {
         # pheatmap object
         pheatmap::pheatmap(
@@ -1443,11 +1601,16 @@ server <- function(input, output, session) {
           units = "in",
           dpi = 300
         )
-
       } else if ("sechm" %in% class(plot_obj)) {
         # sechm object (grid/grob)
         if (fmt == "png") {
-          png(file, width = input$plot_width, height = input$plot_height, units = "in", res = 300)
+          png(
+            file,
+            width = input$plot_width,
+            height = input$plot_height,
+            units = "in",
+            res = 300
+          )
         } else if (fmt == "pdf") {
           pdf(file, width = input$plot_width, height = input$plot_height)
         } else {
@@ -1457,7 +1620,6 @@ server <- function(input, output, session) {
         grid::grid.newpage()
         grid::grid.draw(plot_obj)
         dev.off()
-
       } else {
         stop("Unknown plot type; cannot save")
       }
