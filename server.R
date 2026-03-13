@@ -514,8 +514,6 @@ server <- function(input, output, session) {
     )
   })
 
-  })
-
   ### Sample Correlation ###
 
   # UI for selecting color variables
@@ -903,7 +901,6 @@ server <- function(input, output, session) {
     )
   })
 
-  })
   ##############################################################################
   # Enrichment Analysis
   ##############################################################################
