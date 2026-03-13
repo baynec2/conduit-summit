@@ -40,25 +40,11 @@ conduit_metadata_tab_ui = function(){
       ),
       fluidRow(
         column(width = 6,
-               box(
-                 title = "colData",
-                 width = 12,  # Full width inside the column
-                 status = "primary",
-                 solidHeader = TRUE,
-                 background = NULL,
-                 DT::dataTableOutput("colData")  # Remove width here; control via server
-               )
+        DT::DTOutput("colData",width = "100%")
         ),
         column(width = 6,
                uiOutput("metadata_variable_choices_to_plot_ui"),  # Proper way to include dynamic selectInput
-               box(
-                 title = "Distribution of Selected Variable",
-                 width = 12,  # Full width inside the column
-                 status = "primary",
-                 solidHeader = TRUE,
-                 background = NULL,
-                 plotOutput("metadata_distribution_plot")
-               )
+               plotOutput("metadata_distribution_plot")
         )
       )
     )

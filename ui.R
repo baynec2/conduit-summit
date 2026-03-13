@@ -16,7 +16,6 @@ conduit_theme = create_conduit_theme()
 # Setting max upload size to 500MB
 options(shiny.maxRequestSize = 500 * 1024^2)
 
-
 # UI
 ui <- shinydashboardPlus::dashboardPage(
   header = conduit_header_ui(),

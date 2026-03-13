@@ -10,8 +10,9 @@ conduit_analysis_tab_ui <- function() {
             tabPanel(
               "Feature Numbers",
               shinycssloaders::withSpinner(
-                plotOutput("feature_number_plot",height = "600px"),
-                type = 8, caption = "The Feature Number Plot is on the Way!",
+                plotOutput("feature_number_plot", height = "600px"),
+                type = 8,
+                caption = "The Feature Number Plot is on the Way!",
                 color = "#15131efe"
               )
             ),
@@ -24,11 +25,15 @@ conduit_analysis_tab_ui <- function() {
                   width = 12,
                   solidHeader = TRUE,
                   column(
-                    width = 6,
+                    width = 4,
+                    uiOutput("miss_val_heatmap_feature_number_ui")
+                  ),
+                  column(
+                    width = 4,
                     uiOutput("miss_val_heatmap_col_color_choices_ui")
                   ),
                   column(
-                    width = 6,
+                    width = 4,
                     uiOutput("miss_val_heatmap_row_color_choices_ui")
                   )
                 )
@@ -36,7 +41,8 @@ conduit_analysis_tab_ui <- function() {
               fluidRow(
                 shinycssloaders::withSpinner(
                   plotOutput("missing_value_plot", height = "600px"),
-                  type = 8, caption = "Please wait, the missing value heatmap is loading...",
+                  type = 8,
+                  caption = "Please wait, the missing value heatmap is loading...",
                   color = "#15131efe"
                 )
               )
@@ -55,7 +61,8 @@ conduit_analysis_tab_ui <- function() {
               fluidRow(
                 shinycssloaders::withSpinner(
                   plotOutput("sample_cor_heatmap", height = "600px"),
-                  type = 8, caption = "Sample Correlations On The Way...",
+                  type = 8,
+                  caption = "Sample Correlations On The Way...",
                   color = "#15131efe"
                 )
               )
@@ -64,7 +71,8 @@ conduit_analysis_tab_ui <- function() {
               "Intensity Distribuiton",
               shinycssloaders::withSpinner(
                 plotOutput("intensity_distribution_plot"),
-                type = 8, caption = "One Intensity Distribution Plot Coming Up...",
+                type = 8,
+                caption = "One Intensity Distribution Plot Coming Up...",
                 color = "#15131efe"
               )
             ),
@@ -82,7 +90,8 @@ conduit_analysis_tab_ui <- function() {
               fluidRow(
                 shinycssloaders::withSpinner(
                   plotOutput("density_plot", height = "600px"),
-                  type = 8, caption = "Please wait, your density plot is loading...",
+                  type = 8,
+                  caption = "Please wait, your density plot is loading...",
                   color = "#15131efe"
                 )
               )
@@ -100,7 +109,8 @@ conduit_analysis_tab_ui <- function() {
             status = "primary",
             column(
               width = 4,
-              textInput("pca_plot_formula",
+              textInput(
+                "pca_plot_formula",
                 "Enter facet formula",
                 value = "~ NULL"
               )
@@ -118,7 +128,8 @@ conduit_analysis_tab_ui <- function() {
         fluidRow(
           shinycssloaders::withSpinner(
             plotOutput("pca_plot", height = "600px"),
-            type = 8, caption = "Please wait, your PCA plot is loading...",
+            type = 8,
+            caption = "Please wait, your PCA plot is loading...",
             color = "#15131efe"
           )
         )
@@ -130,32 +141,30 @@ conduit_analysis_tab_ui <- function() {
             title = "Plot Options",
             status = "primary",
             solidHeader = TRUE,
-            width = 12,  # Make the box take up the full row
+            width = 12, # Make the box take up the full row
             fluidRow(
               column(
-                width = 3,
-                selectInput("heatmap_plot_type", "Select type of heatmap",
-                            choices = c("static", "interactive"),
-                            selected = "static"
-                )
-              ),
-              column(
-                width = 3,
+                width = 4,
                 uiOutput("heatmap_feature_number_ui")
               ),
               column(
-                width = 3,
+                width = 4,
                 uiOutput("heatmap_col_color_choices_ui")
               ),
               column(
-                width = 3,
+                width = 4,
                 uiOutput("heatmap_row_color_choices_ui")
               )
             )
           )
         ),
         fluidRow(
-            uiOutput("heatmap_plot_ui"),
+          shinycssloaders::withSpinner(
+            plotly::plotlyOutput("heatmap_plotly", height = "600px"),
+            type = 8,
+            caption = "One interactive heatmap coming up...",
+            color = "#15131efe"
+          )
         )
       ),
       tabPanel(
@@ -167,10 +176,25 @@ conduit_analysis_tab_ui <- function() {
             status = "primary",
             solidHeader = TRUE,
             column(
-              12,
-              textInput("relative_abundance_plot_formula",
+              4,
+              textInput(
+                "relative_abundance_plot_formula",
                 "Enter Facet Formula",
                 value = "~NULL"
+              )
+            ),
+            column(
+              width = 4,
+              uiOutput("relative_abundance_group_by_ui")
+            ),
+            column(
+              width = 4,
+              selectInput(
+                "relative_abundance_function",
+                "Select Function to Aggregate By",
+                choices = c("mean", "median"),
+                multiple = FALSE,
+                selected = "mean"
               )
             )
           )
@@ -178,7 +202,8 @@ conduit_analysis_tab_ui <- function() {
         fluidRow(
           shinycssloaders::withSpinner(
             plotOutput("relative_abundance_plot", height = "600px"),
-            type = 8, caption = "Please wait, your relative abundance plot is on its way....",
+            type = 8,
+            caption = "Please wait, your relative abundance plot is on its way....",
             color = "#15131efe"
           )
         )
@@ -232,7 +257,8 @@ conduit_analysis_tab_ui <- function() {
                 fluidRow(
                   column(
                     width = 4,
-                    textInput("limma_volcano_facet_formula",
+                    textInput(
+                      "limma_volcano_facet_formula",
                       "Faceting Formula",
                       value = "~NULL"
                     )
@@ -243,7 +269,8 @@ conduit_analysis_tab_ui <- function() {
                   ),
                   column(
                     width = 4,
-                    shiny::sliderInput("volcano_p_threshold",
+                    shiny::sliderInput(
+                      "volcano_p_threshold",
                       "p-value threshold",
                       min = 0,
                       max = 1,
@@ -262,7 +289,8 @@ conduit_analysis_tab_ui <- function() {
                 status = "primary",
                 shinycssloaders::withSpinner(
                   plotOutput("limma_volcano_plot"),
-                  type = 8, caption = "Volcano plot incoming...",
+                  type = 8,
+                  caption = "Volcano plot incoming...",
                   color = "#15131efe"
                 )
               )
@@ -299,7 +327,8 @@ conduit_analysis_tab_ui <- function() {
             ),
             column(
               2,
-              selectInput("selected_feature_plot_data_type_ui",
+              selectInput(
+                "selected_feature_plot_data_type",
                 "What type of data to show",
                 choices = c("", "_log2", "_log2_imputed", "_log2_imputed_norm"),
                 selected = "_log2_imputed"
@@ -310,7 +339,8 @@ conduit_analysis_tab_ui <- function() {
         fluidRow(
           shinycssloaders::withSpinner(
             plotOutput("selected_feature_plot", height = "600px"),
-            type = 8, caption = "Feature Plot Loading...",
+            type = 8,
+            caption = "Feature Plot Loading...",
             color = "#15131efe"
           )
         )
@@ -323,17 +353,46 @@ conduit_analysis_tab_ui <- function() {
             status = "primary",
             solidHeader = TRUE,
             width = 4,
-            selectInput("outcome_var", "Select outcome variable", choices = NULL),
-            sliderInput("split_ratio", "Train/Test Split % (Train)", min = 50, max = 90, value = 70),
-            selectInput("model_type", "Model Type", choices = c("lasso_regression", "random_forest", "xgboost")),
-            checkboxInput("show_advanced", "Show advanced options", value = FALSE),
+            selectInput(
+              "outcome_var",
+              "Select outcome variable",
+              choices = NULL
+            ),
+            sliderInput(
+              "split_ratio",
+              "Train/Test Split % (Train)",
+              min = 50,
+              max = 90,
+              value = 70
+            ),
+            selectInput(
+              "model_type",
+              "Model Type",
+              choices = c("lasso_regression", "random_forest", "xgboost"),
+              selected = "random_forest"
+            ),
+            checkboxInput(
+              "show_advanced",
+              "Show advanced options",
+              value = FALSE
+            ),
             conditionalPanel(
               condition = "input.show_advanced == true",
               tags$hr(),
-              numericInput("cv_folds", "Number of CV folds:", value = 5, min = 2, max = 20),
+              numericInput(
+                "cv_folds",
+                "Number of CV folds:",
+                value = 5,
+                min = 2,
+                max = 20
+              ),
               numericInput("random_seed", "Random seed:", value = 123)
             ),
-            actionButton("run_classification_model", "Run Model", icon = icon("cogs"))
+            actionButton(
+              "run_classification_model",
+              "Run Model",
+              icon = icon("cogs")
+            )
           ),
           box(
             title = "Confusion Matrix",
@@ -342,7 +401,8 @@ conduit_analysis_tab_ui <- function() {
             width = 8,
             shinycssloaders::withSpinner(
               plotOutput("confusion_matrix_plot"),
-              type = 8, caption = "Confusion Matrix Loading...",
+              type = 8,
+              caption = "Confusion Matrix Loading...",
               color = "#15131efe"
             )
           )
@@ -353,7 +413,9 @@ conduit_analysis_tab_ui <- function() {
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            selectInput("model_plot_type", "choose type of plot",
+            selectInput(
+              "model_plot_type",
+              "choose type of plot",
               choices = c("ROC", "precision_recall")
             )
           )
@@ -366,7 +428,8 @@ conduit_analysis_tab_ui <- function() {
             width = 6,
             shinycssloaders::withSpinner(
               plotOutput("test_plot"),
-              type = 8, color = "#15131efe"
+              type = 8,
+              color = "#15131efe"
             )
           ),
           box(
@@ -376,7 +439,8 @@ conduit_analysis_tab_ui <- function() {
             width = 6,
             shinycssloaders::withSpinner(
               plotOutput("train_plot"),
-              type = 8, color = "#15131efe"
+              type = 8,
+              color = "#15131efe"
             )
           )
         ),
@@ -397,7 +461,8 @@ conduit_analysis_tab_ui <- function() {
             width = 12,
             shinycssloaders::withSpinner(
               plotOutput("feature_importance_plot"),
-              type = 8, color = "#15131efe"
+              type = 8,
+              color = "#15131efe"
             )
           )
         )
