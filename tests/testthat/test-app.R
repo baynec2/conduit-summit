@@ -45,7 +45,7 @@ test_that("sidebar tabs that require data are initially disabled", {
 # ---------------------------------------------------------------------------
 
 test_that("all plots render after file upload", {
-  test_rds <- file.path(testthat::test_path("../../"), "test", "conduit.rds")
+  test_rds <- testthat::test_path("fixtures", "conduit.rds")
   skip_if_not(file.exists(test_rds), paste("Test fixture not found:", test_rds))
 
   app <- AppDriver$new(
