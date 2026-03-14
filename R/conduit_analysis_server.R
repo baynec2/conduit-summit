@@ -145,7 +145,6 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
         session$ns("pca_plot_shape_choice"),
         "Choose shape variable",
         choices = c("none" = "", final_colData_names()),
-        NULL,
         selected = ""
       )
     })
