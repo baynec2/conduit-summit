@@ -61,14 +61,14 @@ ui <- shinydashboardPlus::dashboardPage(
     use_theme(conduit_theme),
     tabItems(
       conduit_about_tab_ui(),
-      conduit_file_upload_tab_ui(),
-      conduit_diann_qc_tab_ui(),
-      conduit_metadata_tab_ui(),
-      conduit_filter_data_tab_ui(),
-      conduit_analysis_tab_ui(),
-      conduit_traverse_tab_ui(),
-      conduit_enrichment_tab_ui(),
-      conduit_pathway_tab_ui(),
+      conduit_file_upload_tab_ui("file_upload"),
+      conduit_diann_qc_tab_ui("diann_qc"),
+      conduit_metadata_tab_ui("view_metadata"),
+      conduit_filter_data_tab_ui("filter_data"),
+      conduit_analysis_tab_ui("analysis"),
+      conduit_traverse_tab_ui("traverse"),
+      conduit_enrichment_tab_ui("enrichment"),
+      conduit_pathway_tab_ui("pathway"),
       conduit_help_tab_ui()
     )
   ),

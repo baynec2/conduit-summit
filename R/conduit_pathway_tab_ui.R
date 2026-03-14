@@ -1,14 +1,11 @@
-conduit_pathway_tab_ui <- function() {
+conduit_pathway_tab_ui <- function(id = "pathway") {
+  ns <- NS(id)
   tabItem(
     tabName = "pathway",
-    # KEGG pathway selection
     fluidRow(
       column(
         width = 4,
-        actionButton(
-          inputId = "pathway_return_to_stats_button",
-          "Click to Return to Stats"
-        )
+        actionButton(inputId = ns("pathway_return_to_stats_button"), "Click to Return to Stats")
       )
     ),
     fluidRow(
@@ -17,17 +14,13 @@ conduit_pathway_tab_ui <- function() {
         solidHeader = TRUE,
         status = "primary",
         width = 12,
-        column(
-          width = 12,
-          uiOutput("pathway_select_ui")
-        )
+        column(width = 12, uiOutput(ns("pathway_select_ui")))
       )
     ),
-    # Plot output
     fluidRow(
       column(
         width = 12,
-        plotly::plotlyOutput("pathway_plot", width = "100%", height = "90vh")
+        plotly::plotlyOutput(ns("pathway_plot"), width = "100%", height = "90vh")
       )
     )
   )

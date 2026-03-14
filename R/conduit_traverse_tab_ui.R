@@ -1,8 +1,7 @@
-conduit_traverse_tab_ui <- function() {
+conduit_traverse_tab_ui <- function(id = "traverse") {
+  ns <- NS(id)
   tabItem(
     tabName = "traverse",
-
-    # Header / description
     fluidRow(
       column(
         width = 12,
@@ -11,19 +10,15 @@ conduit_traverse_tab_ui <- function() {
               between precursors, peptides, proteins, and higher-level annotations.")
       )
     ),
-
-    # Controls + plot layout
     fluidRow(
-      # Left-side control panel
-      # Right-side plot display
       box(
-        width =8,
+        width = 8,
         height = "550px",
         title = "Feature Intensities Across Assays",
         status = "primary",
         solidHeader = TRUE,
         collapsible = TRUE,
-        plotly::plotlyOutput("qf_plot")
+        plotly::plotlyOutput(ns("qf_plot"))
       ),
       box(
         width = 4,
@@ -32,17 +27,9 @@ conduit_traverse_tab_ui <- function() {
         status = "primary",
         solidHeader = TRUE,
         collapsible = TRUE,
-        textInput("traverse_features",
-                  label = "Feature to explore (copy paste)"
-        ),
-        selectInput("traverse_assay",
-                    label = "Assay to query feature",
-                    choices = NULL
-        ),
-        selectInput("traverse_xaxis",
-                    label = "X-axis variable",
-                    choices = NULL
-        )
+        textInput(ns("traverse_features"), label = "Feature to explore (copy paste)"),
+        selectInput(ns("traverse_assay"), label = "Assay to query feature", choices = NULL),
+        selectInput(ns("traverse_xaxis"), label = "X-axis variable", choices = NULL)
       )
     ),
     fluidRow(
@@ -53,7 +40,7 @@ conduit_traverse_tab_ui <- function() {
         collapsible = TRUE,
         width = 8,
         height = "550px",
-        plotOutput("traverse_plot")
+        plotOutput(ns("traverse_plot"))
       ),
       box(
         width = 4,
@@ -62,8 +49,8 @@ conduit_traverse_tab_ui <- function() {
         status = "primary",
         solidHeader = TRUE,
         collapsible = TRUE,
-        DT::DTOutput("traverse_info")
+        DT::DTOutput(ns("traverse_info"))
       )
     )
-    )
+  )
 }

@@ -1,7 +1,7 @@
-conduit_analysis_tab_ui <- function() {
+conduit_analysis_tab_ui <- function(id = "analysis") {
+  ns <- NS(id)
   tabItem(
     "analysis",
-    # Add sub-tabs within Analysis
     tabsetPanel(
       id = "analysis_tabs",
       tabPanel(
@@ -12,7 +12,7 @@ conduit_analysis_tab_ui <- function() {
             tabPanel(
               "Feature Numbers",
               shinycssloaders::withSpinner(
-                plotOutput("feature_number_plot", height = "600px"),
+                plotOutput(ns("feature_number_plot"), height = "600px"),
                 type = 8, caption = "The Feature Number Plot is on the Way!",
                 color = "#15131efe"
               )
@@ -25,19 +25,13 @@ conduit_analysis_tab_ui <- function() {
                   status = "primary",
                   width = 12,
                   solidHeader = TRUE,
-                  column(
-                    width = 6,
-                    uiOutput("miss_val_heatmap_col_color_choices_ui")
-                  ),
-                  column(
-                    width = 6,
-                    uiOutput("miss_val_heatmap_row_color_choices_ui")
-                  )
+                  column(width = 6, uiOutput(ns("miss_val_heatmap_col_color_choices_ui"))),
+                  column(width = 6, uiOutput(ns("miss_val_heatmap_row_color_choices_ui")))
                 )
               ),
               fluidRow(
                 shinycssloaders::withSpinner(
-                  plotOutput("missing_value_plot", height = "600px"),
+                  plotOutput(ns("missing_value_plot"), height = "600px"),
                   type = 8, caption = "Please wait, the missing value heatmap is loading...",
                   color = "#15131efe"
                 )
@@ -51,12 +45,12 @@ conduit_analysis_tab_ui <- function() {
                   status = "primary",
                   width = 12,
                   solidHeader = TRUE,
-                  uiOutput("sample_cor_heatmap_color_choices_ui")
+                  uiOutput(ns("sample_cor_heatmap_color_choices_ui"))
                 )
               ),
               fluidRow(
                 shinycssloaders::withSpinner(
-                  plotOutput("sample_cor_heatmap", height = "600px"),
+                  plotOutput(ns("sample_cor_heatmap"), height = "600px"),
                   type = 8, caption = "Sample Correlations On The Way...",
                   color = "#15131efe"
                 )
@@ -65,7 +59,7 @@ conduit_analysis_tab_ui <- function() {
             tabPanel(
               "Intensity Distribuiton",
               shinycssloaders::withSpinner(
-                plotOutput("intensity_distribution_plot"),
+                plotOutput(ns("intensity_distribution_plot")),
                 type = 8, caption = "One Intensity Distribution Plot Coming Up...",
                 color = "#15131efe"
               )
@@ -78,12 +72,12 @@ conduit_analysis_tab_ui <- function() {
                   status = "primary",
                   width = 12,
                   solidHeader = TRUE,
-                  uiOutput("density_plot_color_choice_ui", )
+                  uiOutput(ns("density_plot_color_choice_ui"))
                 )
               ),
               fluidRow(
                 shinycssloaders::withSpinner(
-                  plotOutput("density_plot", height = "600px"),
+                  plotOutput(ns("density_plot"), height = "600px"),
                   type = 8, caption = "Please wait, your density plot is loading...",
                   color = "#15131efe"
                 )
@@ -100,26 +94,14 @@ conduit_analysis_tab_ui <- function() {
             width = 12,
             solidHeader = TRUE,
             status = "primary",
-            column(
-              width = 4,
-              textInput("pca_plot_formula",
-                "Enter facet formula",
-                value = "~ NULL"
-              )
-            ),
-            column(
-              width = 4,
-              uiOutput("pca_plot_color_choice_ui")
-            ),
-            column(
-              width = 4,
-              uiOutput("pca_plot_shape_choice_ui")
-            )
+            column(width = 4, textInput(ns("pca_plot_formula"), "Enter facet formula", value = "~ NULL")),
+            column(width = 4, uiOutput(ns("pca_plot_color_choice_ui"))),
+            column(width = 4, uiOutput(ns("pca_plot_shape_choice_ui")))
           )
         ),
         fluidRow(
           shinycssloaders::withSpinner(
-            plotOutput("pca_plot", height = "600px"),
+            plotOutput(ns("pca_plot"), height = "600px"),
             type = 8, caption = "Please wait, your PCA plot is loading...",
             color = "#15131efe"
           )
@@ -132,33 +114,17 @@ conduit_analysis_tab_ui <- function() {
             title = "Plot Options",
             status = "primary",
             solidHeader = TRUE,
-            width = 12, # Make the box take up the full row
+            width = 12,
             fluidRow(
-              column(
-                width = 3,
-                selectInput("heatmap_plot_type", "Select type of heatmap",
-                  choices = c("static", "interactive"),
-                  selected = "static"
-                )
-              ),
-              column(
-                width = 3,
-                uiOutput("heatmap_feature_number_ui")
-              ),
-              column(
-                width = 3,
-                uiOutput("heatmap_col_color_choices_ui")
-              ),
-              column(
-                width = 3,
-                uiOutput("heatmap_row_color_choices_ui")
-              )
+              column(width = 3, selectInput(ns("heatmap_plot_type"), "Select type of heatmap",
+                choices = c("static", "interactive"), selected = "static")),
+              column(width = 3, uiOutput(ns("heatmap_feature_number_ui"))),
+              column(width = 3, uiOutput(ns("heatmap_col_color_choices_ui"))),
+              column(width = 3, uiOutput(ns("heatmap_row_color_choices_ui")))
             )
           )
         ),
-        fluidRow(
-          uiOutput("heatmap_plot_ui"),
-        )
+        fluidRow(uiOutput(ns("heatmap_plot_ui")))
       ),
       tabPanel(
         "Relative Abundance",
@@ -168,18 +134,12 @@ conduit_analysis_tab_ui <- function() {
             title = "Plot Options",
             status = "primary",
             solidHeader = TRUE,
-            column(
-              12,
-              textInput("relative_abundance_plot_formula",
-                "Enter Facet Formula",
-                value = "~NULL"
-              )
-            )
+            column(12, textInput(ns("relative_abundance_plot_formula"), "Enter Facet Formula", value = "~NULL"))
           )
         ),
         fluidRow(
           shinycssloaders::withSpinner(
-            plotOutput("relative_abundance_plot", height = "600px"),
+            plotOutput(ns("relative_abundance_plot"), height = "600px"),
             type = 8, caption = "Please wait, your relative abundance plot is on its way....",
             color = "#15131efe"
           )
@@ -190,31 +150,13 @@ conduit_analysis_tab_ui <- function() {
         fluidRow(
           box(
             title = "Limma Model Setup",
-            width = 12, # Full width
+            width = 12,
             solidHeader = TRUE,
             status = "primary",
             fluidRow(
-              column(
-                width = 3,
-                textInput(
-                  inputId = "limma_formula",
-                  label = "Enter formula for limma analysis"
-                )
-              ),
-              column(
-                width = 6,
-                div(
-                  tags$label("Available contrast terms:"),
-                  verbatimTextOutput("possible_contrasts")
-                )
-              ),
-              column(
-                width = 3,
-                textInput(
-                  inputId = "limma_contrast",
-                  label = "Specify Contrast"
-                )
-              )
+              column(width = 3, textInput(inputId = ns("limma_formula"), label = "Enter formula for limma analysis")),
+              column(width = 6, div(tags$label("Available contrast terms:"), verbatimTextOutput(ns("possible_contrasts")))),
+              column(width = 3, textInput(inputId = ns("limma_contrast"), label = "Specify Contrast"))
             )
           )
         ),
@@ -228,17 +170,8 @@ conduit_analysis_tab_ui <- function() {
                 solidHeader = TRUE,
                 status = "primary",
                 fluidRow(
-                  column(
-                    width = 6,
-                    textInput("limma_volcano_facet_formula",
-                      "Faceting Formula",
-                      value = "~NULL"
-                    )
-                  ),
-                  column(
-                    width = 6,
-                    uiOutput("limma_volcano_color_ui")
-                  ),
+                  column(width = 6, textInput(ns("limma_volcano_facet_formula"), "Faceting Formula", value = "~NULL")),
+                  column(width = 6, uiOutput(ns("limma_volcano_color_ui")))
                 )
               )
             ),
@@ -249,24 +182,18 @@ conduit_analysis_tab_ui <- function() {
                 solidHeader = TRUE,
                 status = "primary",
                 shinycssloaders::withSpinner(
-                  plotOutput("limma_volcano_plot"),
+                  plotOutput(ns("limma_volcano_plot")),
                   type = 8, caption = "Volcano plot incoming...",
                   color = "#15131efe"
                 )
               )
             )
           ),
-          column(
-            width = 6,
-            DT::DTOutput("limma_statistics_table")
-          )
+          column(width = 6, DT::DTOutput(ns("limma_statistics_table")))
         ),
         fluidRow(
-          column(offset = 6,
-                 width = 6,
-                 downloadButton("download_limma_stats_table",
-                                "Download Table", class = "btn-block")
-        )
+          column(offset = 6, width = 6,
+            downloadButton(ns("download_limma_stats_table"), "Download Table", class = "btn-block"))
         ),
         fluidRow(
           box(
@@ -274,40 +201,12 @@ conduit_analysis_tab_ui <- function() {
             title = "Selection Thresholds",
             solidHeader = TRUE,
             status = "primary",
-            column(
-              width = 6,
-              shiny::numericInput(
-                "limma_fc_threshold",
-                "LogFC Threshold",
-                value = 0,
-                min =
-                )
-            ),
-            column(
-              width = 6,
-              shiny::sliderInput("limma_p_threshold",
-                "p-value threshold",
-                min = 0,
-                max = 1,
-                value = 0.05,
-                step = 0.01
-              )
-            ),
+            column(width = 6, shiny::numericInput(ns("limma_fc_threshold"), "LogFC Threshold", value = 0, min = 0)),
+            column(width = 6, shiny::sliderInput(ns("limma_p_threshold"), "p-value threshold",
+              min = 0, max = 1, value = 0.05, step = 0.01)),
             fluidRow(
-              column(
-                6,
-                actionButton(
-                  "enrichment_analysis_button",
-                  "Click For Enrichment Analyis"
-                )
-              ),
-              column(
-                6,
-                actionButton(
-                  "pathway_analysis_button",
-                  "Click For Pathway Analysis"
-                )
-              )
+              column(6, actionButton(ns("enrichment_analysis_button"), "Click For Enrichment Analyis")),
+              column(6, actionButton(ns("pathway_analysis_button"), "Click For Pathway Analysis"))
             )
           )
         ),
@@ -317,35 +216,17 @@ conduit_analysis_tab_ui <- function() {
             title = "Selected Feature Plot Options",
             solidHeader = TRUE,
             status = "primary",
-            column(
-              2,
-              uiOutput("selected_feature_plot_x_axis_ui")
-            ),
-            column(
-              3,
-              uiOutput("selected_feature_plot_facet_formula_ui")
-            ),
-            column(
-              2,
-              uiOutput("selected_feature_plot_color_ui")
-            ),
-            column(
-              2,
-              uiOutput("selected_feature_plot_shape_ui")
-            ),
-            column(
-              2,
-              selectInput("selected_feature_plot_data_type_ui",
-                "What type of data to show",
-                choices = c("", "_log2", "_log2_imputed", "_log2_imputed_norm"),
-                selected = "_log2_imputed"
-              )
-            )
+            column(2, uiOutput(ns("selected_feature_plot_x_axis_ui"))),
+            column(3, uiOutput(ns("selected_feature_plot_facet_formula_ui"))),
+            column(2, uiOutput(ns("selected_feature_plot_color_ui"))),
+            column(2, uiOutput(ns("selected_feature_plot_shape_ui"))),
+            column(2, selectInput(ns("selected_feature_plot_data_type_ui"), "What type of data to show",
+              choices = c("", "_log2", "_log2_imputed", "_log2_imputed_norm"), selected = "_log2_imputed"))
           )
         ),
         fluidRow(
           shinycssloaders::withSpinner(
-            plotOutput("selected_feature_plot", height = "600px"),
+            plotOutput(ns("selected_feature_plot"), height = "600px"),
             type = 8, caption = "Feature Plot Loading...",
             color = "#15131efe"
           )
@@ -384,58 +265,22 @@ conduit_analysis_tab_ui <- function() {
           )
         ),
         fluidRow(
-          box(
-            title = "Type of Plot To Show",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            selectInput("model_plot_type", "choose type of plot",
-              choices = c("ROC", "precision_recall")
-            )
-          )
+          box(title = "Type of Plot To Show", status = "primary", solidHeader = TRUE, width = 12,
+            selectInput("model_plot_type", "choose type of plot", choices = c("ROC", "precision_recall")))
         ),
         fluidRow(
-          box(
-            title = "Plot of Test Set",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 6,
-            shinycssloaders::withSpinner(
-              plotOutput("test_plot"),
-              type = 8, color = "#15131efe"
-            )
-          ),
-          box(
-            title = "Plot of Training Set",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 6,
-            shinycssloaders::withSpinner(
-              plotOutput("train_plot"),
-              type = 8, color = "#15131efe"
-            )
-          )
+          box(title = "Plot of Test Set", status = "primary", solidHeader = TRUE, width = 6,
+            shinycssloaders::withSpinner(plotOutput("test_plot"), type = 8, color = "#15131efe")),
+          box(title = "Plot of Training Set", status = "primary", solidHeader = TRUE, width = 6,
+            shinycssloaders::withSpinner(plotOutput("train_plot"), type = 8, color = "#15131efe"))
         ),
         fluidRow(
-          box(
-            title = "Features to show",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            uiOutput("features_to_show_slider_ui")
-          )
+          box(title = "Features to show", status = "primary", solidHeader = TRUE, width = 12,
+            uiOutput("features_to_show_slider_ui"))
         ),
         fluidRow(
-          box(
-            title = "Feature Importance",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            shinycssloaders::withSpinner(
-              plotOutput("feature_importance_plot"),
-              type = 8, color = "#15131efe"
-            )
-          )
+          box(title = "Feature Importance", status = "primary", solidHeader = TRUE, width = 12,
+            shinycssloaders::withSpinner(plotOutput("feature_importance_plot"), type = 8, color = "#15131efe"))
         )
       )
     )
