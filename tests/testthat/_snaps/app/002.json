@@ -1,0 +1,12 @@
+{
+  "output": {
+    "diann_qc-diann_qc_plot": {
+      "message": "",
+      "call": "NULL",
+      "type": [
+        "shiny.silent.error",
+        "validation"
+      ]
+    }
+  }
+}

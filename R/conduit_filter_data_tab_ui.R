@@ -1,7 +1,7 @@
-conduit_filter_data_tab_ui = function(){
+conduit_filter_data_tab_ui <- function(id = "filter_data") {
+  ns <- NS(id)
   tabItem(
     "filter_data",
-    # Metadata Filter Box
     fluidRow(
       box(
         width = 12,
@@ -9,11 +9,9 @@ conduit_filter_data_tab_ui = function(){
         background = NULL,
         status = "primary",
         title = "Metadata (Sample) Filter",
-        uiOutput("sample_filters")
+        uiOutput(ns("sample_filters"))
       )
     ),
-
-    # Feature Filter Box
     fluidRow(
       box(
         width = 12,
@@ -21,11 +19,9 @@ conduit_filter_data_tab_ui = function(){
         background = NULL,
         status = "primary",
         title = "Feature Filter (Per Assay)",
-        uiOutput("feature_filters")
+        uiOutput(ns("feature_filters"))
       )
     ),
-
-    # Filtered result output (optional)
     fluidRow(
       box(
         width = 12,
@@ -33,7 +29,7 @@ conduit_filter_data_tab_ui = function(){
         background = NULL,
         status = "primary",
         title = "Filtered Data Preview",
-        verbatimTextOutput("filtered_qfeatures")
+        verbatimTextOutput(ns("filtered_qfeatures"))
       )
     )
   )

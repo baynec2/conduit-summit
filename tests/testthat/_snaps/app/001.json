@@ -1,0 +1,9 @@
+{
+  "output": {
+    "file_upload-taxa_tree_plot": {
+      "message": "no slot of name \"metrics\" for this object of class \"conduit\"",
+      "call": "slot(conduit_obj, \"metrics\")",
+      "type": null
+    }
+  }
+}

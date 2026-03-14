@@ -1,14 +1,12 @@
-conduit_file_upload_tab_ui = function(){
+conduit_file_upload_tab_ui <- function(id = "file_upload") {
+  ns <- NS(id)
   tabItem(
     "file_upload",
-    # Main body where the user will upload files.
-    # Description of Conduit-GUI usage with hyperlink
     h3(
       "Conduit-Summit uses the file created by ",
       a("Conduit-Ascent", href = "https://github.com/baynec2/conduit-ascent")
     ),
-    fileInput("conduit.rds", "Upload Conduit .rds File", accept = ".rds"),
-    # Bottom Box that will show the user what they have uploaded
+    fileInput("conduit_rds", "Upload Conduit .rds File", accept = ".rds"),
     box(
       solidHeader = TRUE,
       title = "Uploaded File Stats",
@@ -20,7 +18,7 @@ conduit_file_upload_tab_ui = function(){
           width = 4,
           descriptionBlock(
             text = "# Samples",
-            header = textOutput("num_samples"),  # Corrected to textOutput directly
+            header = textOutput(ns("num_samples")),
             rightBorder = TRUE,
             marginBottom = FALSE
           )
@@ -29,8 +27,8 @@ conduit_file_upload_tab_ui = function(){
           width = 4,
           descriptionBlock(
             text = "# of Species Detected",
-            header =textOutput("num_species_detected"),
-            number = textOutput("per_species_detected"),# Corrected to the correct output
+            header = textOutput(ns("num_species_detected")),
+            number = textOutput(ns("per_species_detected")),
             rightBorder = FALSE,
             marginBottom = FALSE
           )
@@ -39,8 +37,8 @@ conduit_file_upload_tab_ui = function(){
           width = 4,
           descriptionBlock(
             text = "# of Proteins Detected",
-            header = textOutput("num_proteins_detected"),
-            number = textOutput("per_proteins_detected"),  # Corrected to the correct output
+            header = textOutput(ns("num_proteins_detected")),
+            number = textOutput(ns("per_proteins_detected")),
             rightBorder = FALSE,
             marginBottom = FALSE
           )
@@ -53,24 +51,24 @@ conduit_file_upload_tab_ui = function(){
           solidHeader = TRUE,
           status = "primary",
           shinycssloaders::withSpinner(
-            plotOutput("taxa_tree_plot", width = "100%",height = "900px"),
-            type = 8,caption = "Please wait, the taxonomic tree is loading...",
+            plotOutput(ns("taxa_tree_plot"), width = "100%", height = "900px"),
+            type = 8, caption = "Please wait, the taxonomic tree is loading...",
             color = "#15131efe"
           )
-          )
+      )
     ),
     fluidRow(
-        box(title = "Coverage per Species",
-            status = "primary",
-            solidHeader = TRUE,
-            width = NULL,
-            height = "500px",
-            DT::dataTableOutput("protein_taxonomy", height = "400px")
-            ),
-        column(
-          width = 12,
-          downloadButton("download_protein_taxonomy", "Download Table", class = "btn-block")
-        )
+      box(title = "Coverage per Species",
+          status = "primary",
+          solidHeader = TRUE,
+          width = NULL,
+          height = "500px",
+          DT::dataTableOutput(ns("protein_taxonomy"), height = "400px")
+      ),
+      column(
+        width = 12,
+        downloadButton(ns("download_protein_taxonomy"), "Download Table", class = "btn-block")
       )
     )
+  )
 }

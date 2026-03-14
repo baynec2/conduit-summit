@@ -1,4 +1,5 @@
-conduit_metadata_tab_ui = function(){
+conduit_metadata_tab_ui <- function(id = "view_metadata") {
+  ns <- NS(id)
   tabItem(
     "view_metadata",
     fluidRow(
@@ -22,7 +23,7 @@ conduit_metadata_tab_ui = function(){
             width = 3,
             descriptionBlock(
               text = "# Continuous",
-              header = textOutput("num_continuous_variables"),
+              header = textOutput(ns("num_continuous_variables")),
               rightBorder = FALSE,
               marginBottom = FALSE
             )
@@ -31,7 +32,7 @@ conduit_metadata_tab_ui = function(){
             width = 3,
             descriptionBlock(
               text = "# Discrete",
-              header = textOutput("num_discrete_variables"),
+              header = textOutput(ns("num_discrete_variables")),
               rightBorder = FALSE,
               marginBottom = FALSE
             )
@@ -42,30 +43,29 @@ conduit_metadata_tab_ui = function(){
         column(width = 6,
                box(
                  title = "colData",
-                 width = 12,  # Full width inside the column
+                 width = 12,
                  status = "primary",
                  solidHeader = TRUE,
                  background = NULL,
-                 DT::dataTableOutput("colData")  # Remove width here; control via server
+                 DT::dataTableOutput(ns("colData"))
                )
         ),
         column(width = 6,
-               uiOutput("metadata_variable_choices_to_plot_ui"),  # Proper way to include dynamic selectInput
+               uiOutput(ns("metadata_variable_choices_to_plot_ui")),
                box(
                  title = "Distribution of Selected Variable",
-                 width = 12,  # Full width inside the column
+                 width = 12,
                  status = "primary",
                  solidHeader = TRUE,
                  background = NULL,
-                 plotOutput("metadata_distribution_plot")
+                 plotOutput(ns("metadata_distribution_plot"))
                )
         )
       ),
       column(
         width = 6,
-        downloadButton("download_colData_table", "Download Table", class = "btn-block")
+        downloadButton(ns("download_colData_table"), "Download Table", class = "btn-block")
       )
     )
   )
-
 }
