@@ -11,10 +11,15 @@ conduit_traverse_server <- function(id, conduit_obj, qf, colData) {
       updateSelectInput(session, inputId = "traverse_xaxis", choices = names(colData()))
     })
 
-    traverse_data <- reactive({
-      req(qf(), input$traverse_features, input$traverse_assay)
+    selected_se_subset <- eventReactive(input$apply_traverse, {
+      req(qf(), input$traverse_features)
+      qf()[input$traverse_features, ]
+    })
 
-      se <- qf()[input$traverse_features, ][[input$traverse_assay]]
+    traverse_data <- reactive({
+      req(selected_se_subset(), input$traverse_assay)
+
+      se <- selected_se_subset()[[input$traverse_assay]]
 
       cd <- colData() |>
         as.data.frame() |>
@@ -37,8 +42,8 @@ conduit_traverse_server <- function(id, conduit_obj, qf, colData) {
     })
 
     output$traverse_info <- DT::renderDT({
-      req(qf(), input$traverse_features)
-      se <- qf()[input$traverse_features, ]
+      req(selected_se_subset())
+      se <- selected_se_subset()
       dims <- sapply(SummarizedExperiment::assays(se), dim)
       rownames(dims) <- c("# Features", "# Samples")
       as.data.frame(dims[1, ])

@@ -24,7 +24,9 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
             choices = c("gsea", "ora"))
         ),
         column(width = 3, uiOutput(ns("enrichment_direction_ui"))),
-        column(width = 3, fluidRow(uiOutput(ns("enrichment_plot_options_ui"))))
+        column(width = 3, fluidRow(uiOutput(ns("enrichment_plot_options_ui")))),
+        column(width = 12, actionButton(ns("run_enrichment"), "Run Enrichment", icon = icon("play"),
+                                       class = "btn-primary"))
       ),
       fluidRow(
         shinycssloaders::withSpinner(

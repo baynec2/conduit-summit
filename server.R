@@ -191,7 +191,7 @@ server <- function(input, output, session) {
   ##############################################################################
   # Add Log Transformation, Imputation, Normalization, and Relative Abundance
   ##############################################################################
-  final_qf <- reactive({
+  final_qf <- eventReactive(list(input$run_processing, filtered_qf()), {
     req(
       filtered_qf(),
       selected_assay(),
@@ -259,7 +259,7 @@ server <- function(input, output, session) {
     # removeModal()  # Done processing
     shinyalert::closeAlert()
     new_qf
-  })
+  }, ignoreInit = FALSE)
 
   ##############################################################################
   # Analysis
@@ -274,13 +274,13 @@ server <- function(input, output, session) {
   })
 
   final_colData_names <- reactive({
-    req(final_qf())
-    names(SummarizedExperiment::colData(final_qf()))
+    req(filtered_qf())
+    names(SummarizedExperiment::colData(filtered_qf()))
   })
 
   final_rowData_names <- reactive({
-    req(final_qf())
-    names(SummarizedExperiment::rowData(final_qf()[[processed_assay()]]))
+    req(filtered_qf(), selected_assay())
+    names(SummarizedExperiment::rowData(filtered_qf()[[selected_assay()]]))
   })
 
   analysis_outputs <- conduit_analysis_server(
@@ -520,7 +520,7 @@ server <- function(input, output, session) {
             "Feature Numbers" = analysis_outputs$feature_number_plot(),
             "Missing Values" = analysis_outputs$missing_value_plot(),
             "Sample Correlation" = analysis_outputs$sample_cor_heatmap(),
-            "Intensity Distribution" = NULL,
+            "Intensity Distribution" = analysis_outputs$intensity_distribution_plot(),
             "Density Plot" = analysis_outputs$density_plot(),
             NULL
           )
