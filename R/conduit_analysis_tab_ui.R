@@ -156,7 +156,9 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             fluidRow(
               column(width = 3, textInput(inputId = ns("limma_formula"), label = "Enter formula for limma analysis")),
               column(width = 6, div(tags$label("Available contrast terms:"), verbatimTextOutput(ns("possible_contrasts")))),
-              column(width = 3, textInput(inputId = ns("limma_contrast"), label = "Specify Contrast"))
+              column(width = 3, textInput(inputId = ns("limma_contrast"), label = "Specify Contrast")),
+              column(width = 12, actionButton(ns("run_limma"), "Run Analysis", icon = icon("play"),
+                                             class = "btn-primary"))
             )
           )
         ),

@@ -85,7 +85,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       sample_cor_heatmap()
     })
 
-    output$intensity_distribution_plot <- renderPlot({
+    intensity_distribution_plot <- reactive({
       req(final_qf(), selected_assay())
       se  <- final_qf()[[selected_assay()]]
       mat <- SummarizedExperiment::assay(se)
@@ -99,6 +99,10 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
           title = paste("Detection Frequency —", selected_assay())
         ) +
         ggplot2::theme_minimal()
+    })
+
+    output$intensity_distribution_plot <- renderPlot({
+      intensity_distribution_plot()
     })
 
     output$density_plot_color_choice_ui <- renderUI({
@@ -304,7 +308,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       )
     })
 
-    limma_stats_results <- reactive({
+    limma_stats_results <- eventReactive(input$run_limma, {
       req(final_qf(), processed_assay(), input$limma_formula, input$limma_contrast)
       conduitR::perform_limma_analysis(
         final_qf(),
@@ -442,6 +446,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       feature_number_plot = feature_number_plot,
       missing_value_plot = missing_value_plot,
       sample_cor_heatmap = sample_cor_heatmap,
+      intensity_distribution_plot = intensity_distribution_plot,
       density_plot = density_plot,
       pca_plot = pca_plot,
       heatmap_plot_static = heatmap_plot_static,

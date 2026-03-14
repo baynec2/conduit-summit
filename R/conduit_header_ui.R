@@ -72,7 +72,9 @@ conduit_header_ui <- function() {
           value = 1,
           min = 1,
           max = 1000
-        )
+        ),
+        actionButton("run_processing", "Apply Processing", icon = icon("play"),
+                     class = "btn-primary btn-block")
       )
     )
   )

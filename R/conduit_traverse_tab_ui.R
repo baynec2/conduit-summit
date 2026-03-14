@@ -29,7 +29,9 @@ conduit_traverse_tab_ui <- function(id = "traverse") {
         collapsible = TRUE,
         textInput(ns("traverse_features"), label = "Feature to explore (copy paste)"),
         selectInput(ns("traverse_assay"), label = "Assay to query feature", choices = NULL),
-        selectInput(ns("traverse_xaxis"), label = "X-axis variable", choices = NULL)
+        selectInput(ns("traverse_xaxis"), label = "X-axis variable", choices = NULL),
+        actionButton(ns("apply_traverse"), "Apply", icon = icon("play"),
+                     class = "btn-primary btn-block")
       )
     ),
     fluidRow(

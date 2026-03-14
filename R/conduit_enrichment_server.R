@@ -27,7 +27,7 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
       }
     })
 
-    enrichment_results <- reactive({
+    enrichment_results <- eventReactive(input$run_enrichment, {
       req(limma_stats_results(), conduit_obj(), input$annotation_type, input$enrichment_type)
 
       if (input$enrichment_type == "gsea") {
