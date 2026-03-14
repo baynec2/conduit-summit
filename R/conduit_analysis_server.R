@@ -1,5 +1,6 @@
 conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assay,
-                                    final_colData_names, final_rowData_names, session_parent) {
+                                    final_colData_names, final_rowData_names, session_parent,
+                                    log_base) {
   moduleServer(id, function(input, output, session) {
 
     ##########################################################################
@@ -8,7 +9,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     feature_number_plot <- reactive({
       req(final_qf(), selected_assay())
-      DEP::plot_coverage(final_qf()[[selected_assay()]]) +
+      conduitR::plot_features_per_sample(final_qf(), assay = selected_assay()) +
         ggplot2::ylab(paste0("Number of ", selected_assay()))
     })
 
@@ -19,7 +20,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$miss_val_heatmap_col_color_choices_ui <- renderUI({
       req(final_colData_names())
       selectInput(
-        "miss_val_heatmap_col_color_choices",
+        session$ns("miss_val_heatmap_col_color_choices"),
         "Choose columns to color",
         choices = c(final_colData_names(), NULL),
         selected = NULL,
@@ -30,7 +31,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$miss_val_heatmap_row_color_choices_ui <- renderUI({
       req(final_rowData_names())
       selectInput(
-        "miss_val_heatmap_row_color_choices",
+        session$ns("miss_val_heatmap_row_color_choices"),
         "Choose row annotations",
         choices = c(final_rowData_names(), NULL),
         selected = NULL,
@@ -38,14 +39,21 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       )
     })
 
+    # The missing-value heatmap must use the log-only assay (before imputation)
+    # so that NAs are still present and visible.  The processed_assay has had
+    # all NAs filled in, which causes sechm to throw "two distinct break values".
+    log_assay <- reactive({
+      req(processed_assay())
+      sub("_imputed.*$", "", processed_assay())
+    })
+
     missing_value_plot <- reactive({
-      req(final_qf(), processed_assay())
+      req(final_qf(), log_assay())
       conduitR::plot_missing_val_heatmap(
         final_qf(),
-        assay_name = processed_assay(),
+        assay_name = log_assay(),
         col_color_variables = input$miss_val_heatmap_col_color_choices,
-        row_color_variables = input$miss_val_heatmap_row_color_choices,
-        scale = FALSE
+        row_color_variables = input$miss_val_heatmap_row_color_choices
       )
     })
 
@@ -56,7 +64,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$sample_cor_heatmap_color_choices_ui <- renderUI({
       req(final_colData_names())
       selectInput(
-        "sample_cor_heatmap_color_choices",
+        session$ns("sample_cor_heatmap_color_choices"),
         "Choose annotation",
         choices = final_colData_names(),
         selected = NULL,
@@ -79,25 +87,36 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     output$intensity_distribution_plot <- renderPlot({
       req(final_qf(), selected_assay())
-      DEP::plot_detect(final_qf()[[selected_assay()]])
+      se  <- final_qf()[[selected_assay()]]
+      mat <- SummarizedExperiment::assay(se)
+      n_detected <- rowSums(!is.na(mat))
+      df <- data.frame(n_detected = n_detected)
+      ggplot2::ggplot(df, ggplot2::aes(x = n_detected)) +
+        ggplot2::geom_histogram(binwidth = 1, fill = "#3B528BFF", color = "white") +
+        ggplot2::labs(
+          x = "Number of Samples Feature Is Detected In",
+          y = "Number of Features",
+          title = paste("Detection Frequency —", selected_assay())
+        ) +
+        ggplot2::theme_minimal()
     })
 
     output$density_plot_color_choice_ui <- renderUI({
       req(final_colData_names())
       selectInput(
-        "density_plot_color_choice",
+        session$ns("density_plot_color_choice"),
         "Choose color variable",
         choices = final_colData_names(),
-        selected = ""
+        selected = final_colData_names()[[1]]
       )
     })
 
     density_plot <- reactive({
-      req(final_qf(), selected_assay(), input$log_base, input$density_plot_color_choice)
+      req(final_qf(), selected_assay(), log_base(), input$density_plot_color_choice)
       conduitR::plot_density(
         final_qf(),
         assay_name = selected_assay(),
-        input$log_base,
+        log_base(),
         input$density_plot_color_choice
       )
     })
@@ -113,7 +132,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$pca_plot_color_choice_ui <- renderUI({
       req(final_colData_names())
       selectInput(
-        "pca_plot_color_choice",
+        session$ns("pca_plot_color_choice"),
         "Choose color variable",
         choices = c("none" = "", final_colData_names(), NULL),
         selected = ""
@@ -123,7 +142,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$pca_plot_shape_choice_ui <- renderUI({
       req(final_colData_names())
       selectInput(
-        "pca_plot_shape_choice",
+        session$ns("pca_plot_shape_choice"),
         "Choose shape variable",
         choices = c("none" = "", final_colData_names()),
         NULL,
@@ -153,7 +172,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$heatmap_feature_number_ui <- renderUI({
       req(final_qf(), processed_assay())
       sliderInput(
-        "heatmap_feature_number",
+        session$ns("heatmap_feature_number"),
         "Max N Of Rows To Show",
         min = 1,
         max = nrow(SummarizedExperiment::rowData(final_qf()[[processed_assay()]])),
@@ -164,7 +183,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$heatmap_col_color_choices_ui <- renderUI({
       req(final_colData_names())
       selectInput(
-        "heatmap_col_color_choices",
+        session$ns("heatmap_col_color_choices"),
         "Choose columns to color",
         choices = final_colData_names(),
         selected = NULL,
@@ -175,7 +194,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$heatmap_row_color_choices_ui <- renderUI({
       req(final_rowData_names())
       selectInput(
-        "heatmap_row_color_choices",
+        session$ns("heatmap_row_color_choices"),
         "Choose row annotations",
         choices = final_rowData_names(),
         selected = NULL,
@@ -227,7 +246,8 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     heatmap_plot_static <- reactive({
       req(input$heatmap_plot_type == "static", heatmap_args())
-      do.call(conduitR::plot_heatmap, heatmap_args())
+      # scale=FALSE: sechm (used by plot_heatmap) accepts a logical
+      do.call(conduitR::plot_heatmap, c(heatmap_args(), list(scale = FALSE)))
     })
 
     output$heatmap_plot_static <- renderPlot({
@@ -236,7 +256,8 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     output$heatmap_plotly <- plotly::renderPlotly({
       req(input$heatmap_plot_type == "interactive", heatmap_args())
-      do.call(conduitR::plot_heatmaply, heatmap_args())
+      # scale="none": heatmaply expects a character, not a logical
+      do.call(conduitR::plot_heatmaply, c(heatmap_args(), list(scale = "none")))
     })
 
     ##########################################################################
@@ -325,7 +346,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$limma_volcano_color_ui <- renderUI({
       req(final_rowData_names())
       selectInput(
-        "limma_volcano_color",
+        session$ns("limma_volcano_color"),
         "Choose how the points are colored",
         choices = c("none" = "", final_rowData_names()),
         selected = "",
@@ -356,23 +377,23 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     output$selected_feature_plot_x_axis_ui <- renderUI({
       req(final_colData_and_rowData_names())
-      selectInput("selected_feature_plot_x_axis", "Choose x axis",
+      selectInput(session$ns("selected_feature_plot_x_axis"), "Choose x axis",
         choices = final_colData_and_rowData_names(), multiple = FALSE)
     })
 
     output$selected_feature_plot_facet_formula_ui <- renderUI({
-      textInput("selected_feature_plot_facet_formula", "Choose facet formula", value = "~ NULL")
+      textInput(session$ns("selected_feature_plot_facet_formula"), "Choose facet formula", value = "~ NULL")
     })
 
     output$selected_feature_plot_color_ui <- renderUI({
       req(final_colData_and_rowData_names())
-      selectInput("selected_feature_plot_color", "Choose color",
+      selectInput(session$ns("selected_feature_plot_color"), "Choose color",
         choices = c("none" = "", final_colData_and_rowData_names()), multiple = FALSE, selected = "")
     })
 
     output$selected_feature_plot_shape_ui <- renderUI({
       req(final_colData_and_rowData_names())
-      selectInput("selected_feature_plot_shape", "Choose shape",
+      selectInput(session$ns("selected_feature_plot_shape"), "Choose shape",
         choices = c("none" = "", final_colData_and_rowData_names()), multiple = FALSE, selected = "")
     })
 

@@ -4,7 +4,7 @@ conduit_diann_qc_server <- function(id, conduit_obj, metrics) {
     output$diann_qc_columns_ui <- renderUI({
       req(metrics())
       selectInput(
-        "diann_qc_metric",
+        session$ns("diann_qc_metric"),
         "Choose QC metric to plot",
         choices = names(metrics()$diann_stats),
         selected = "Proteins.Identified"
