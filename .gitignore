@@ -6,3 +6,5 @@
 conduit-GUI.Rproj
 rsconnect/*
 test/*.rds
+tests/testthat/_snaps/
+Rplots.pdf
