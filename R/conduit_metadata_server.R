@@ -31,10 +31,10 @@ conduit_metadata_server <- function(id, conduit_obj, colData) {
     output$metadata_variable_choices_to_plot_ui <- renderUI({
       req(colData())
       selectInput(
-        "metadata_variable_choices_to_plot",
+        session$ns("metadata_variable_choices_to_plot"),
         "Choose variable to plot",
         choices = names(colData()),
-        selected = NULL
+        selected = names(colData())[[1]]
       )
     })
 

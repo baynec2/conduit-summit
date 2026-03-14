@@ -290,7 +290,8 @@ server <- function(input, output, session) {
     selected_assay = selected_assay,
     final_colData_names = final_colData_names,
     final_rowData_names = final_rowData_names,
-    session_parent = session
+    session_parent = session,
+    log_base = reactive(input$log_base)
   )
 
   limma_stats_results <- analysis_outputs$limma_stats_results

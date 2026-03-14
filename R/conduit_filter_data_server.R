@@ -14,9 +14,10 @@ conduit_filter_data_server <- function(id, qf, colData, selected_assay) {
     output$sample_filters <- renderUI({
       req(sample_vars(), colData())
       lapply(sample_vars(), function(var) {
+        if (is.list(colData()[[var]])) return(NULL)
         vals <- unique(colData()[[var]])
         pickerInput(
-          paste0("sample_", var),
+          session$ns(paste0("sample_", var)),
           label = var,
           choices = vals,
           selected = vals,
@@ -33,12 +34,15 @@ conduit_filter_data_server <- function(id, qf, colData, selected_assay) {
       se <- qf()[[selected_assay()]]
       rd <- SummarizedExperiment::rowData(se)
 
-      # Only show pickerInputs for columns with <50 unique values
+      # Only show pickerInputs for columns with <50 unique scalar values;
+      # skip list-type columns (e.g. GO term lists) which cause shinyWidgets
+      # to throw "All sub-lists in 'choices' must be named".
       lapply(feature_vars(), function(var) {
+        if (is.list(rd[[var]])) return(NULL)
         vals <- unique(rd[[var]])
         if (length(vals) >= 50) return(NULL)
         pickerInput(
-          paste0("feature_", var),
+          session$ns(paste0("feature_", var)),
           label = var,
           choices = vals,
           selected = vals,
