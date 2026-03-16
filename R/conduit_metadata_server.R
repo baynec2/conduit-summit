@@ -1,6 +1,11 @@
 conduit_metadata_server <- function(id, conduit_obj, colData) {
   moduleServer(id, function(input, output, session) {
 
+    output$num_sample_md_variables <- renderText({
+      req(colData())
+      ncol(colData())
+    })
+
     output$num_continuous_variables <- renderText({
       req(colData())
       sum(sapply(colData(), is.numeric))
@@ -11,12 +16,9 @@ conduit_metadata_server <- function(id, conduit_obj, colData) {
       sum(sapply(colData(), function(x) !is.numeric(x)))
     })
 
-    output$colData <- DT::renderDataTable({
+    output$colData <- DT::renderDT({
       req(colData())
-      DT::datatable(
-        as.data.frame(colData()),
-        options = list(scrollX = TRUE)
-      )
+      conduit_datatable(as.data.frame(colData()))
     })
 
     output$download_colData_table <- downloadHandler(

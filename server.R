@@ -7,87 +7,48 @@ server <- function(input, output, session) {
   ##############################################################################
   # User Experience
   ##############################################################################
-  # Hide the Enrichment menu item immediately after load
-  # Delay hiding until sidebar is rendered
-  shiny::observe({
-    shinyjs::runjs(
-      "
-      setTimeout(function() {
-        var el = document.querySelector('a[data-value=\"enrichment\"]');
-        if (el) {
-          el.parentElement.style.display = 'none';
-        }
-      }, 500);
-    "
-    )
-  })
-  # Hide the Pathway Tab
-  shiny::observe({
-    shinyjs::runjs(
-      "
-    setTimeout(function() {
-      var pathwayTab = document.querySelector('a[data-value=\"pathway\"]');
-      if (pathwayTab) {
-        pathwayTab.parentElement.style.display = 'none';
-      }
-    }, 500);
-  "
-    )
-  })
-
-  # Show progress using Hostess on load
-  # hostess <- Hostess$new("loader")
-  #
-  # shiny::observe({
-  #   for (i in 1:10) {
-  #     Sys.sleep(0.2)
-  #     hostess$set(i * 10)
-  #   }
-  #   waiter_hide()
-  # })
-
   # Observe the plot theme input and update the global theme
   observeEvent(input$plot_theme, {
     set_plot_theme(input$plot_theme)
   })
 
-  # ##############################################################################
-  # # Hiding menu items initially, then have them appear once data is loaded
-  # ##############################################################################
-  ## Initially Hide Tabs ##
-  # Disable sidebar tabs at startup
-  shiny::observe({
-    tabs_to_disable <- c(
-      "view_metadata",
-      "filter_data",
-      "analysis",
-      "diann_qc",
-      "traverse"
-    )
-    lapply(tabs_to_disable, function(tab) {
-      shinyjs::runjs(sprintf(
-        "$('.sidebar-menu a[data-value=\"%s\"]').addClass('disabled-tab');",
-        tab
-      ))
-    })
+  # About page navigation shortcuts
+  observeEvent(input$goto_upload,           { bslib::nav_select("main_tabs", "file_upload") })
+  observeEvent(input$step_goto_file_upload, { bslib::nav_select("main_tabs", "file_upload") })
+  observeEvent(input$goto_help,                  { bslib::nav_select("main_tabs", "help") })
+  observeEvent(input$goto_help_from_upload,      { bslib::nav_select("main_tabs", "help") })
+  observeEvent(input$step_goto_database,    { bslib::nav_select("main_tabs", "database") })
+  observeEvent(input$step_goto_diann_qc,    { bslib::nav_select("main_tabs", "diann_qc") })
+  observeEvent(input$step_goto_metadata,    { bslib::nav_select("main_tabs", "view_metadata") })
+  observeEvent(input$step_goto_filter,      { bslib::nav_select("main_tabs", "filter_data") })
+  observeEvent(input$step_goto_view_assay,  { bslib::nav_select("main_tabs", "view_assay") })
+  observeEvent(input$step_goto_analysis,    { bslib::nav_select("main_tabs", "analysis") })
+  observeEvent(input$step_goto_traverse,    { bslib::nav_select("main_tabs", "traverse") })
+
+  # Workflow step locking — steps 2-8 locked until file is uploaded
+  locked_steps <- c("step_2", "step_3", "step_4", "step_5", "step_6", "step_7", "step_8")
+  observe({
+    lapply(locked_steps, function(id) shinyjs::addClass(id, "workflow-locked"))
+  })
+  observe({
+    req(input$conduit_rds)
+    lapply(locked_steps, function(id) shinyjs::removeClass(id, "workflow-locked"))
   })
 
-  shiny::observe({
-    req(input$conduit_rds) # Only proceeds when file is uploaded
-    tabs_to_enable <- c(
-      "view_metadata",
-      "filter_data",
-      "analysis",
-      "diann_qc",
-      "traverse"
-    )
-    lapply(tabs_to_enable, function(tab) {
-      shinyjs::runjs(sprintf(
-        "$('.sidebar-menu a[data-value=\"%s\"]').removeClass('disabled-tab');",
-        tab
-      ))
-    })
+  ##############################################################################
+  # Tab visibility — hide data-dependent tabs until file is uploaded
+  ##############################################################################
+  data_tabs <- c("database", "diann_qc", "view_metadata", "filter_data", "view_assay", "analysis", "traverse")
+
+  observe({
+    lapply(data_tabs, function(tab) bslib::nav_hide("main_tabs", tab))
   })
+
+  observe({
+    req(input$conduit_rds)
+    lapply(data_tabs, function(tab) bslib::nav_show("main_tabs", tab, select = FALSE))
+  })
+
 
   ###############################################################################
   # Loading + Manipulating Data
@@ -95,6 +56,28 @@ server <- function(input, output, session) {
   # Read in data from .rds conduit output
   conduit_obj <- reactive({
     req(input$conduit_rds) # Ensure file is uploaded
+
+    shinyalert::shinyalert(
+      title = "Loading Data",
+      text  = HTML(paste0(
+        "<p>Your <b>", input$conduit_rds$name, "</b> file is being loaded.</p>",
+        "<p>Once loaded, data will be processed with the following default settings:</p>",
+        "<ul>",
+        "<li><b>Log base:</b> ", input$log_base, "</li>",
+        "<li><b>Imputation method:</b> ", input$imputation_method, "</li>",
+        "<li><b>Normalization method:</b> ", input$normalization_method, "</li>",
+        "</ul>",
+        "<p>Please wait...</p>",
+        "<p><i>You can change any of these settings from the top bar controls.</i></p>"
+      )),
+      type                = "info",
+      html                = TRUE,
+      showCancelButton    = FALSE,
+      closeOnClickOutside = FALSE,
+      showConfirmButton   = FALSE,
+      size                = "l"
+    )
+
     readRDS(input$conduit_rds$datapath)
   })
 
@@ -117,10 +100,10 @@ server <- function(input, output, session) {
   })
 
   ##############################################################################
-  # File Upload Tab
+  # Database Tab
   ##############################################################################
-  taxa_tree_plot <- conduit_file_upload_server(
-    "file_upload",
+  taxa_tree_plot <- conduit_database_server(
+    "database",
     conduit_obj = conduit_obj,
     qf = qf,
     metrics = metrics,
@@ -200,35 +183,41 @@ server <- function(input, output, session) {
       input$normalization_method
     )
 
-    message <- HTML(paste0(
-      "<p>Your <b>",
-      selected_assay(),
-      "</b> data is being processed with the following settings:</p>",
-      "<ul>",
-      "<li><b>Log base:</b> ",
-      input$log_base,
-      "</li>",
-      "<li><b>Imputation method:</b> ",
-      input$imputation_method,
-      "</li>",
-      "<li><b>Normalization method:</b> ",
-      input$normalization_method,
-      "</li>",
-      "</ul>",
-      "<p>Please wait while the data is being processed...</p>",
-      "<p><i>If you’d like to change any of the options above, you can do so from the tabs at the top of the screen.</i></p>"
-    ))
+    # Only show the processing modal when the user explicitly clicked the button;
+    # silent re-runs (e.g. on data load or filter changes) skip the modal.
+    show_modal <- isTRUE(input$run_processing > 0)
 
-    shinyalert::shinyalert(
-      title = "Data Processing",
-      text = message,
-      type = "info",
-      html = TRUE,
-      showCancelButton = FALSE,
-      closeOnClickOutside = FALSE,
-      showConfirmButton = FALSE,
-      size = "l"
-    )
+    if (show_modal) {
+      message <- HTML(paste0(
+        "<p>Your <b>",
+        selected_assay(),
+        "</b> data is being processed with the following settings:</p>",
+        "<ul>",
+        "<li><b>Log base:</b> ",
+        input$log_base,
+        "</li>",
+        "<li><b>Imputation method:</b> ",
+        input$imputation_method,
+        "</li>",
+        "<li><b>Normalization method:</b> ",
+        input$normalization_method,
+        "</li>",
+        "</ul>",
+        "<p>Please wait while the data is being processed...</p>",
+        "<p><i>If you’d like to change any of the options above, you can do so from the tabs at the top of the screen.</i></p>"
+      ))
+
+      shinyalert::shinyalert(
+        title = "Data Processing",
+        text = message,
+        type = "info",
+        html = TRUE,
+        showCancelButton = FALSE,
+        closeOnClickOutside = FALSE,
+        showConfirmButton = FALSE,
+        size = "l"
+      )
+    }
 
     # Compute updated QFeatures object
     new_qf <- conduitR::add_log_imputed_norm_assay(
@@ -256,7 +245,6 @@ server <- function(input, output, session) {
       new_qf <- conduitR::add_relative_abundance_assay(new_qf, selected_assay())
     }
 
-    # removeModal()  # Done processing
     shinyalert::closeAlert()
     new_qf
   }, ignoreInit = FALSE)
@@ -283,6 +271,13 @@ server <- function(input, output, session) {
     names(SummarizedExperiment::rowData(filtered_qf()[[selected_assay()]]))
   })
 
+  conduit_view_assay_server(
+    "view_assay",
+    final_qf       = final_qf,
+    selected_assay = selected_assay,
+    processed_assay = processed_assay
+  )
+
   analysis_outputs <- conduit_analysis_server(
     "analysis",
     final_qf = final_qf,
@@ -291,32 +286,13 @@ server <- function(input, output, session) {
     final_colData_names = final_colData_names,
     final_rowData_names = final_rowData_names,
     session_parent = session,
-    log_base = reactive(input$log_base)
+    log_base = reactive(input$log_base),
+    conduit_obj = conduit_obj
   )
 
   limma_stats_results <- analysis_outputs$limma_stats_results
-
-  ##############################################################################
-  # Enrichment Analysis
-  ##############################################################################
-  enrichment_plot <- conduit_enrichment_server(
-    "enrichment",
-    conduit_obj = conduit_obj,
-    limma_stats_results = limma_stats_results,
-    limma_fc_threshold = analysis_outputs$limma_fc_threshold,
-    limma_p_threshold = analysis_outputs$limma_p_threshold,
-    session_parent = session
-  )
-
-  ##############################################################################
-  # Pathway Viewing
-  ##############################################################################
-  pathway_plot <- conduit_pathway_server(
-    "pathway",
-    conduit_obj = conduit_obj,
-    limma_stats_results = limma_stats_results,
-    session_parent = session
-  )
+  enrichment_plot     <- analysis_outputs$enrichment_plot
+  pathway_plot        <- analysis_outputs$pathway_plot
 
   ##############################################################################
   # Traverse
@@ -501,11 +477,9 @@ server <- function(input, output, session) {
     if (main_tab != "analysis") {
       switch(
         main_tab,
-        "file_upload" = taxa_tree_plot(),
+        "database" = taxa_tree_plot(),
         "diann_qc" = diann_qc_plot(),
         "view_metadata" = metadata_distribution_plot(),
-        "enrichment" = enrichment_plot(),
-        "pathway" = pathway_plot(),
         "traverse" = traverse_plot(),
         NULL
       )
@@ -529,6 +503,8 @@ server <- function(input, output, session) {
         "Heatmap" = analysis_outputs$heatmap_plot_static(),
         "Relative Abundance" = analysis_outputs$relative_abundance_plot(),
         "Statistics" = analysis_outputs$limma_volcano_plot(),
+        "Enrichment" = enrichment_plot(),
+        "Pathway" = pathway_plot(),
         "Classification Prediction" = {
           req(input$class_sub_tabs)
           switch(

@@ -1,6 +1,6 @@
 conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assay,
                                     final_colData_names, final_rowData_names, session_parent,
-                                    log_base) {
+                                    log_base, conduit_obj) {
   moduleServer(id, function(input, output, session) {
 
     ##########################################################################
@@ -318,25 +318,14 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       )$top_table
     })
 
-    output$limma_statistics_table <- DT::renderDataTable({
-      DT::datatable(
-        limma_stats_results() |>
-          dplyr::mutate(dplyr::across(
-            where(is.character),
-            ~ ifelse(
-              nchar(.) > 15,
-              paste0("<span title='", ., "'>", substr(., 1, 15), "...</span>"),
-              .
-            )
-          )),
-        escape = FALSE,
-        options = list(scrollX = TRUE, autoWidth = TRUE)
-      ) |>
-        DT::formatStyle(
-          columns = names(limma_stats_results()),
-          `white-space` = "normal",
-          `word-wrap` = "break-word"
-        )
+    output$limma_statistics_table <- DT::renderDT({
+      shiny::validate(
+        shiny::need(input$run_limma > 0, "Fill in the formula and contrast, then click \u201cRun Analysis\u201d to populate the table.")
+      )
+      conduit_datatable(
+        limma_stats_results(),
+        column_defs = conduit_truncate_column_defs()
+      )
     })
 
     output$download_limma_stats_table <- downloadHandler(
@@ -344,6 +333,27 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       content = function(file) {
         readr::write_csv(as.data.frame(limma_stats_results()), file)
       }
+    )
+
+    ##########################################################################
+    # Enrichment and Pathway (nested inside Analysis card)
+    # Initialized here so threshold reactives are available to the volcano plot
+    ##########################################################################
+    enrichment_results <- conduit_enrichment_server(
+      "enrichment",
+      conduit_obj         = conduit_obj,
+      limma_stats_results = limma_stats_results,
+      session_parent      = session_parent
+    )
+    enrichment_plot         <- enrichment_results$enrichment_plot
+    enrichment_fc_threshold <- enrichment_results$limma_fc_threshold
+    enrichment_p_threshold  <- enrichment_results$limma_p_threshold
+
+    pathway_plot <- conduit_pathway_server(
+      "pathway",
+      conduit_obj         = conduit_obj,
+      limma_stats_results = limma_stats_results,
+      session_parent      = session_parent
     )
 
     output$limma_volcano_color_ui <- renderUI({
@@ -358,18 +368,23 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     })
 
     limma_volcano_plot <- reactive({
-      req(limma_stats_results(), input$limma_fc_threshold, input$limma_p_threshold, input$limma_volcano_facet_formula)
+      req(limma_stats_results(), input$limma_volcano_facet_formula)
+      fc <- if (!is.null(enrichment_fc_threshold())) enrichment_fc_threshold() else 0
+      pv <- if (!is.null(enrichment_p_threshold()))  enrichment_p_threshold()  else 0.05
       conduitR::plot_volcano(
         limma_stats_results(),
         facet_formula = as.formula(input$limma_volcano_facet_formula),
         color_by = input$limma_volcano_color,
-        pval_threshold = input$limma_p_threshold
+        pval_threshold = pv
       ) +
-        ggplot2::geom_vline(xintercept = input$limma_fc_threshold, linetype = "dashed", color = "red") +
-        ggplot2::geom_vline(xintercept = -input$limma_fc_threshold, linetype = "dashed", color = "red")
+        ggplot2::geom_vline(xintercept = fc, linetype = "dashed", color = "red") +
+        ggplot2::geom_vline(xintercept = -fc, linetype = "dashed", color = "red")
     })
 
     output$limma_volcano_plot <- renderPlot({
+      if (input$run_limma == 0) {
+        return(waiting_plot("Fill in the formula and contrast, then click \u201cRun Analysis\u201d"))
+      }
       limma_volcano_plot()
     })
 
@@ -423,16 +438,22 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     })
 
     output$selected_feature_plot <- renderPlot({
+      if (input$run_limma == 0) {
+        return(waiting_plot("Run analysis, then select a feature from the statistics table"))
+      }
+      if (is.null(input$limma_statistics_table_rows_selected)) {
+        return(waiting_plot("Select a feature row from the statistics table"))
+      }
       selected_feature_plot()
     })
 
-    # Tab navigation to enrichment/pathway (uses parent session)
+    # Tab navigation to enrichment/pathway (within the analysis card)
     observeEvent(input$enrichment_analysis_button, {
-      updateTabItems(session_parent, "main_tabs", "enrichment")
+      bslib::nav_select("analysis_tabs", "Enrichment", session = session_parent)
     })
 
     observeEvent(input$pathway_analysis_button, {
-      updateTabItems(session_parent, "main_tabs", "pathway")
+      bslib::nav_select("analysis_tabs", "Pathway", session = session_parent)
     })
 
     ##########################################################################
@@ -441,8 +462,8 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     return(list(
       limma_stats_results = limma_stats_results,
       limma_volcano_plot = limma_volcano_plot,
-      limma_fc_threshold = reactive(input$limma_fc_threshold),
-      limma_p_threshold = reactive(input$limma_p_threshold),
+      limma_fc_threshold = enrichment_fc_threshold,
+      limma_p_threshold  = enrichment_p_threshold,
       feature_number_plot = feature_number_plot,
       missing_value_plot = missing_value_plot,
       sample_cor_heatmap = sample_cor_heatmap,
@@ -451,7 +472,9 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       pca_plot = pca_plot,
       heatmap_plot_static = heatmap_plot_static,
       relative_abundance_plot = relative_abundance_plot,
-      selected_feature_plot = selected_feature_plot
+      selected_feature_plot = selected_feature_plot,
+      enrichment_plot = enrichment_plot,
+      pathway_plot = pathway_plot
     ))
   })
 }

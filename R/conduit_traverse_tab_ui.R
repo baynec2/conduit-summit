@@ -1,57 +1,62 @@
 conduit_traverse_tab_ui <- function(id = "traverse") {
   ns <- NS(id)
-  tabItem(
-    tabName = "traverse",
-    fluidRow(
-      column(
-        width = 12,
-        h3("Traverse Feature Hierarchies"),
-        tags$p("Explore linked intensities across assays and hierarchical relationships
-              between precursors, peptides, proteins, and higher-level annotations.")
+  bslib::layout_sidebar(
+    sidebar = bslib::sidebar(
+      title  = "Controls",
+      width  = 280,
+      bg     = "#f8f9fb",
+      fg     = "#1a1a2e",
+      open   = "open",
+      p(
+        class = "text-muted small mb-2",
+        "Explore linked intensities across assays and hierarchical feature relationships."
+      ),
+      textInput(ns("traverse_features"), label = "Feature (copy & paste)"),
+      selectInput(ns("traverse_assay"), label = "Assay", choices = NULL),
+      selectInput(ns("traverse_xaxis"), label = "X-axis variable", choices = NULL),
+      hr(),
+      actionButton(
+        ns("apply_traverse"), "Apply",
+        icon  = icon("play"),
+        class = "btn-primary w-100"
       )
     ),
-    fluidRow(
-      box(
-        width = 8,
-        height = "550px",
-        title = "Feature Intensities Across Assays",
-        status = "primary",
-        solidHeader = TRUE,
-        collapsible = TRUE,
-        plotly::plotlyOutput(ns("qf_plot"))
+    tagList(
+      bslib::card(
+        full_screen = TRUE,
+        class       = "card-light",
+        bslib::card_header("Feature Intensities Across Assays (Interactive)"),
+        bslib::card_body(
+          shinycssloaders::withSpinner(
+            plotly::plotlyOutput(ns("qf_plot"), height = "480px"),
+            type = 8, caption = "Loading feature hierarchy...", color = "#15131e"
+          )
+        )
       ),
-      box(
-        width = 4,
-        height = "550px",
-        title = "Controls",
-        status = "primary",
-        solidHeader = TRUE,
-        collapsible = TRUE,
-        textInput(ns("traverse_features"), label = "Feature to explore (copy paste)"),
-        selectInput(ns("traverse_assay"), label = "Assay to query feature", choices = NULL),
-        selectInput(ns("traverse_xaxis"), label = "X-axis variable", choices = NULL),
-        actionButton(ns("apply_traverse"), "Apply", icon = icon("play"),
-                     class = "btn-primary btn-block")
-      )
-    ),
-    fluidRow(
-      box(
-        title = "Feature Intensities Across Assays",
-        status = "primary",
-        solidHeader = TRUE,
-        collapsible = TRUE,
-        width = 8,
-        height = "550px",
-        plotOutput(ns("traverse_plot"))
-      ),
-      box(
-        width = 4,
-        height = "550px",
-        title = "Feature Intensities Across Assays",
-        status = "primary",
-        solidHeader = TRUE,
-        collapsible = TRUE,
-        DT::DTOutput(ns("traverse_info"))
+      bslib::layout_columns(
+        col_widths = c(7, 5),
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Feature Intensities (Static)"),
+          bslib::card_body(
+            shinycssloaders::withSpinner(
+              plotOutput(ns("traverse_plot"), height = "460px"),
+              type = 8, caption = "Loading intensity plot...", color = "#15131e"
+            )
+          )
+        ),
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Feature Details"),
+          bslib::card_body(
+            shinycssloaders::withSpinner(
+              DT::DTOutput(ns("traverse_info")),
+              type = 8, caption = "Loading feature details...", color = "#15131e"
+            )
+          )
+        )
       )
     )
   )

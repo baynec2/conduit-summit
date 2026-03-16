@@ -1,27 +1,19 @@
 conduit_pathway_tab_ui <- function(id = "pathway") {
   ns <- NS(id)
-  tabItem(
-    tabName = "pathway",
-    fluidRow(
-      column(
-        width = 4,
-        actionButton(inputId = ns("pathway_return_to_stats_button"), "Click to Return to Stats")
-      )
+  bslib::layout_sidebar(
+    sidebar = bslib::sidebar(
+      title  = "Pathway Controls",
+      width  = 280,
+      bg     = "#f8f9fb",
+      fg     = "#1a1a2e",
+      open   = "open",
+      actionButton(
+        ns("pathway_return_to_stats_button"),
+        tagList(icon("arrow-left"), " Return to Stats"),
+        class = "btn-outline-secondary btn-sm w-100 mb-3"
+      ),
+      uiOutput(ns("pathway_select_ui"))
     ),
-    fluidRow(
-      box(
-        title = "Kegg Pathway Selection",
-        solidHeader = TRUE,
-        status = "primary",
-        width = 12,
-        column(width = 12, uiOutput(ns("pathway_select_ui")))
-      )
-    ),
-    fluidRow(
-      column(
-        width = 12,
-        plotly::plotlyOutput(ns("pathway_plot"), width = "100%", height = "90vh")
-      )
-    )
+    plotly::plotlyOutput(ns("pathway_plot"), width = "100%", height = "88vh")
   )
 }

@@ -1,70 +1,56 @@
 conduit_metadata_tab_ui <- function(id = "view_metadata") {
   ns <- NS(id)
-  tabItem(
-    "view_metadata",
-    fluidRow(
-      box(
-        solidHeader = TRUE,
-        title = "Metadata Metrics",
-        background = NULL,
-        width = 12,
-        status = "info",
-        footer = fluidRow(
-          column(
-            width = 3,
-            descriptionBlock(
-              text = "# of Variables",
-              header = textOutput("num_sample_md_variables"),
-              rightBorder = TRUE,
-              marginBottom = FALSE
-            )
+  tagList(
+    bslib::layout_columns(
+      col_widths = c(4, 4, 4),
+      bslib::value_box(
+        title    = "# of Variables",
+        value    = textOutput(ns("num_sample_md_variables")),
+        showcase = icon("table"),
+        theme    = "primary"
+      ),
+      bslib::value_box(
+        title    = "# Continuous",
+        value    = textOutput(ns("num_continuous_variables")),
+        showcase = icon("wave-square"),
+        theme    = "primary"
+      ),
+      bslib::value_box(
+        title    = "# Discrete",
+        value    = textOutput(ns("num_discrete_variables")),
+        showcase = icon("list"),
+        theme    = "primary"
+      )
+    ),
+    bslib::layout_sidebar(
+      sidebar = bslib::sidebar(
+        title    = "Plot Controls",
+
+        width    = 260,
+        bg       = "#f8f9fb",
+        fg       = "#1a1a2e",
+        uiOutput(ns("metadata_variable_choices_to_plot_ui"))
+      ),
+      tagList(
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Distribution of Selected Variable"),
+          bslib::card_body(
+            plotOutput(ns("metadata_distribution_plot"), height = "420px")
+          )
+        ),
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Sample Metadata"),
+          bslib::card_body(
+            DT::dataTableOutput(ns("colData"), height = "380px")
           ),
-          column(
-            width = 3,
-            descriptionBlock(
-              text = "# Continuous",
-              header = textOutput(ns("num_continuous_variables")),
-              rightBorder = FALSE,
-              marginBottom = FALSE
-            )
-          ),
-          column(
-            width = 3,
-            descriptionBlock(
-              text = "# Discrete",
-              header = textOutput(ns("num_discrete_variables")),
-              rightBorder = FALSE,
-              marginBottom = FALSE
-            )
+          bslib::card_footer(
+            downloadButton(ns("download_colData_table"), "Download Table")
           )
         )
-      ),
-      fluidRow(
-        column(width = 6,
-               box(
-                 title = "colData",
-                 width = 12,
-                 status = "primary",
-                 solidHeader = TRUE,
-                 background = NULL,
-                 DT::dataTableOutput(ns("colData"))
-               )
-        ),
-        column(width = 6,
-               uiOutput(ns("metadata_variable_choices_to_plot_ui")),
-               box(
-                 title = "Distribution of Selected Variable",
-                 width = 12,
-                 status = "primary",
-                 solidHeader = TRUE,
-                 background = NULL,
-                 plotOutput(ns("metadata_distribution_plot"))
-               )
-        )
-      ),
-      column(
-        width = 6,
-        downloadButton(ns("download_colData_table"), "Download Table", class = "btn-block")
       )
     )
   )
