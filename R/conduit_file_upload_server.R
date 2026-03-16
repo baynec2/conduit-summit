@@ -1,4 +1,4 @@
-conduit_file_upload_server <- function(id, conduit_obj, qf, metrics, colData, rowData) {
+conduit_database_server <- function(id, conduit_obj, qf, metrics, colData, rowData) {
   moduleServer(id, function(input, output, session) {
 
     # Stats box outputs
@@ -21,9 +21,9 @@ conduit_file_upload_server <- function(id, conduit_obj, qf, metrics, colData, ro
         length()
     })
 
-    output$num_protein_detected <- renderText({
-      req(rowData())
-      nrow(rowData())
+    output$num_proteins_detected <- renderText({
+      req(qf())
+      nrow(SummarizedExperiment::rowData(qf()[["protein_groups"]]))
     })
 
     output$per_proteins_detected <- renderText({
@@ -48,7 +48,7 @@ conduit_file_upload_server <- function(id, conduit_obj, qf, metrics, colData, ro
     })
 
     output$protein_taxonomy <- DT::renderDT({
-      protein_taxonomy_table()
+      conduit_datatable(protein_taxonomy_table())
     })
 
     output$download_protein_taxonomy <- downloadHandler(

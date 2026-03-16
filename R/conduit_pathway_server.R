@@ -35,8 +35,7 @@ conduit_pathway_server <- function(id, conduit_obj, limma_stats_results, session
     })
 
     observeEvent(input$pathway_return_to_stats_button, {
-      updateTabItems(session_parent, "main_tabs", "analysis")
-      updateTabsetPanel(session_parent, "analysis_tabs", selected = "stats")
+      bslib::nav_select("analysis_tabs", "Statistics", session = session_parent)
     })
 
     return(pathway_plot)

@@ -1,21 +1,32 @@
-conduit_sidebar_ui = function(){
-  shinydashboardPlus::dashboardSidebar(
-    shinydashboard::sidebarMenu(
-      id = "main_tabs",
-      menuItem("About", tabName = "about", icon = icon("info-circle")),
-      menuItem("File Upload", tabName = "file_upload", icon = icon("cloud-upload-alt")),
-      menuItem("DIA-NN QC", tabName = "diann_qc", icon = icon("check")),
-      menuItem("View Metadata", tabName = "view_metadata", icon = icon("id-card")),
-      menuItem("Filter Data", tabName = "filter_data", icon = icon("filter")),
-      menuItem("Analysis", tabName = "analysis", icon = icon("chart-line")),
-      menuItem("Traverse",tabName = "traverse", icon = icon("sitemap")),
-      menuItem("Help", tabName = "help", icon = icon("question-circle")),
-      menuItem("Enrichment", tabName = "enrichment", icon = icon("network-wired")),
-      menuItem("Pathway",tabName = "pathway", icon = icon("diagram-project"))
-      ),
-      downloadButton("download_current_plot",
-                     "Save Current Plot",
-                     class = "btn-block",
-                     style = "background-color: white; color: black; border: 1px solid #ccc;")
+conduit_nav_link <- function(input_id, tab_value, icon_name, label) {
+  actionLink(
+    inputId   = input_id,
+    label     = tagList(icon(icon_name), " ", label),
+    class     = "nav-link",
+    `data-tab` = tab_value
+  )
+}
+
+conduit_sidebar_ui <- function() {
+  bslib::sidebar(
+    id    = "main_sidebar",
+    width = 220,
+    bg    = "#15131e",
+    fg    = "#ffffff",
+    open  = "always",
+    tags$nav(
+      class = "nav flex-column conduit-nav mt-1",
+      conduit_nav_link("tab_about",         "about",         "info-circle",     "About"),
+      conduit_nav_link("tab_file_upload",   "file_upload",   "cloud-upload-alt","File Upload"),
+      conduit_nav_link("tab_diann_qc",      "diann_qc",      "check",           "DIA-NN QC"),
+      conduit_nav_link("tab_view_metadata", "view_metadata", "id-card",         "View Metadata"),
+      conduit_nav_link("tab_filter_data",   "filter_data",   "filter",          "Filter Data"),
+      conduit_nav_link("tab_analysis",      "analysis",      "chart-line",      "Analysis"),
+      conduit_nav_link("tab_traverse",      "traverse",      "sitemap",         "Traverse"),
+      conduit_nav_link("tab_help",          "help",          "question-circle", "Help")
+    ),
+    tags$hr(style = "border-color: rgba(255,255,255,0.15); margin: 10px 0;"),
+    downloadButton("download_current_plot", "Save Current Plot",
+                   class = "btn-outline-light btn-sm w-100")
   )
 }

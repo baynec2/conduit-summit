@@ -26,7 +26,7 @@ conduit_diann_qc_server <- function(id, conduit_obj, metrics) {
     })
 
     output$diann_qc_table <- DT::renderDT({
-      diann_stats()
+      conduit_datatable(diann_stats())
     })
 
     output$download_diann_stats <- downloadHandler(

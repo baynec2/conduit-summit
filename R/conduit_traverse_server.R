@@ -42,11 +42,14 @@ conduit_traverse_server <- function(id, conduit_obj, qf, colData) {
     })
 
     output$traverse_info <- DT::renderDT({
+      shiny::validate(
+        shiny::need(input$apply_traverse > 0, "Enter a feature and click \u201cApply\u201d to see feature details.")
+      )
       req(selected_se_subset())
       se <- selected_se_subset()
       dims <- sapply(SummarizedExperiment::assays(se), dim)
       rownames(dims) <- c("# Features", "# Samples")
-      as.data.frame(dims[1, ])
+      conduit_datatable(as.data.frame(dims[1, ]))
     })
 
     traverse_plot <- reactive({
@@ -58,6 +61,9 @@ conduit_traverse_server <- function(id, conduit_obj, qf, colData) {
     })
 
     output$traverse_plot <- renderPlot({
+      if (input$apply_traverse == 0) {
+        return(waiting_plot("Enter a feature and click \u201cApply\u201d to generate the plot"))
+      }
       traverse_plot()
     })
 

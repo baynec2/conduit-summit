@@ -1,5 +1,4 @@
 conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
-                                       limma_fc_threshold, limma_p_threshold,
                                        session_parent) {
   moduleServer(id, function(input, output, session) {
 
@@ -38,23 +37,27 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
           ranking_column = "logFC"
         )
       } else if (input$enrichment_type == "ora") {
-        req(input$enrichment_direction, limma_fc_threshold())
+        req(input$enrichment_direction, input$limma_fc_threshold)
         conduitR::perform_ora(
           limma_stats_results(),
           direction = input$enrichment_direction,
           conduit = conduit_obj(),
           annotation_type = input$annotation_type,
-          adj_pval_threshold = limma_p_threshold(),
+          adj_pval_threshold = input$limma_p_threshold,
           logFC_threshold = if (input$enrichment_direction == "down") {
-            limma_fc_threshold() * -1
+            input$limma_fc_threshold * -1
           } else {
-            limma_fc_threshold()
+            input$limma_fc_threshold
           }
         )
       }
     })
 
     output$enrichment_summary <- renderPrint({
+      if (input$run_enrichment == 0) {
+        cat("Configure settings and click \u201cRun Enrichment\u201d to see results.")
+        return(invisible(NULL))
+      }
       req(enrichment_results())
       enrichment_results()
     })
@@ -76,14 +79,20 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
     })
 
     output$enrichment_plot <- renderPlot({
+      if (input$run_enrichment == 0) {
+        return(waiting_plot("Configure settings and click \u201cRun Enrichment\u201d"))
+      }
       enrichment_plot()
     })
 
     observeEvent(input$enrichment_return_to_stats_button, {
-      updateTabItems(session_parent, "main_tabs", "analysis")
-      updateTabsetPanel(session_parent, "analysis_tabs", selected = "stats")
+      bslib::nav_select("analysis_tabs", "Statistics", session = session_parent)
     })
 
-    return(enrichment_plot)
+    return(list(
+      enrichment_plot    = enrichment_plot,
+      limma_fc_threshold = reactive(input$limma_fc_threshold),
+      limma_p_threshold  = reactive(input$limma_p_threshold)
+    ))
   })
 }
