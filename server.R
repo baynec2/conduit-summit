@@ -345,8 +345,6 @@ server <- function(input, output, session) {
       input$random_seed
     )
 
-    set.seed(random_seed)
-
     message <- HTML(paste0(
       "<p>Your <b>",
       selected_assay(),
@@ -379,13 +377,16 @@ server <- function(input, output, session) {
       size = "l"
     )
 
-    result <- conduitR::predict_classification(
-      final_qf(),
-      assay_name = processed_assay(),
-      outcome = input$outcome_var,
-      train_percent = input$split_ratio,
-      model_type = input$model_type,
-      v = input$cv_folds
+    result <- withr::with_seed(
+      input$random_seed,
+      conduitR::predict_classification(
+        final_qf(),
+        assay_name = processed_assay(),
+        outcome = input$outcome_var,
+        train_percent = input$split_ratio,
+        model_type = input$model_type,
+        v = input$cv_folds
+      )
     )
 
     shinyalert::closeAlert()
