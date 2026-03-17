@@ -126,6 +126,62 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
       )
     ),
 
+    # ── Explore ──────────────────────────────────────────────────────────────
+    bslib::nav_panel(
+      "Explore",
+      bslib::layout_sidebar(
+        sidebar = ctrl_sidebar(
+          width = 300,
+          bslib::accordion(
+            open = c("Group & Summarize", "Plot Controls"),
+            bslib::accordion_panel(
+              "Group & Summarize", icon = icon("layer-group"),
+              uiOutput(ns("explore_group_by_ui")),
+              selectInput(
+                ns("explore_summary_fn"), "Summarize intensity by",
+                choices = c(
+                  "Mean"      = "mean",
+                  "Median"    = "median",
+                  "Sum"       = "sum",
+                  "Std dev"   = "sd",
+                  "N (count)" = "n"
+                ),
+                selected = "mean"
+              ),
+              actionButton(
+                ns("explore_apply"), "Apply",
+                icon = icon("play"), class = "btn-primary w-100"
+              )
+            ),
+            bslib::accordion_panel(
+              "Plot Controls", icon = icon("sliders"),
+              selectInput(
+                ns("explore_plot_type"), "Plot type",
+                choices = c(
+                  "Scatter"   = "scatter",
+                  "Bar"       = "bar",
+                  "Line"      = "line",
+                  "Boxplot"   = "boxplot",
+                  "Violin"    = "violin",
+                  "Histogram" = "histogram"
+                ),
+                selected = "boxplot"
+              ),
+              uiOutput(ns("explore_x_axis_ui")),
+              uiOutput(ns("explore_y_axis_ui")),
+              uiOutput(ns("explore_color_ui")),
+              uiOutput(ns("explore_shape_ui")),
+              textInput(ns("explore_facet_formula"), "Facet formula", value = "~NULL")
+            )
+          )
+        ),
+        shinycssloaders::withSpinner(
+          plotOutput(ns("explore_plot"), height = "600px"),
+          type = 8, caption = "Building plot...", color = "#15131e"
+        )
+      )
+    ),
+
     # ── Statistics ───────────────────────────────────────────────────────────
     bslib::nav_panel(
       "Statistics",
@@ -198,27 +254,27 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             bslib::card(
               full_screen = TRUE,
               class       = "card-light",
-              bslib::card_header("Statistics Table"),
+              bslib::card_header("Selected Feature Plot"),
               bslib::card_body(
                 shinycssloaders::withSpinner(
-                  DT::DTOutput(ns("limma_statistics_table")),
-                  type = 8, caption = "Loading statistics table...", color = "#15131e"
+                  plotOutput(ns("selected_feature_plot"), height = "480px"),
+                  type = 8, caption = "Loading feature plot...", color = "#15131e"
                 )
-              ),
-              bslib::card_footer(
-                downloadButton(ns("download_limma_stats_table"), "Download Table")
               )
             )
           ),
           bslib::card(
             full_screen = TRUE,
             class       = "card-light",
-            bslib::card_header("Selected Feature Plot"),
+            bslib::card_header("Statistics Table"),
             bslib::card_body(
               shinycssloaders::withSpinner(
-                plotOutput(ns("selected_feature_plot"), height = "500px"),
-                type = 8, caption = "Loading feature plot...", color = "#15131e"
+                DT::DTOutput(ns("limma_statistics_table")),
+                type = 8, caption = "Loading statistics table...", color = "#15131e"
               )
+            ),
+            bslib::card_footer(
+              downloadButton(ns("download_limma_stats_table"), "Download Table")
             )
           )
         )

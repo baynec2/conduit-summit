@@ -5,11 +5,11 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
     output$enrichment_plot_options_ui <- renderUI({
       req(input$enrichment_type)
       if (input$enrichment_type == "gsea") {
-        selectInput("enrichment_plot_type", "Choose Enrichment Plot Type",
+        selectInput(session$ns("enrichment_plot_type"), "Choose Enrichment Plot Type",
           choices = c("ridgeplot", "dotplot", "treeplot", "upsetplot"),
           selected = "ridgeplot")
       } else if (input$enrichment_type == "ora") {
-        selectInput("enrichment_plot_type", "Choose Enrichment Plot Type",
+        selectInput(session$ns("enrichment_plot_type"), "Choose Enrichment Plot Type",
           choices = c("barplot", "dotplot", "treeplot", "upsetplot", "cnetplot"),
           selected = "barplot")
       }
@@ -18,10 +18,10 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
     output$enrichment_direction_ui <- renderUI({
       req(input$enrichment_type)
       if (input$enrichment_type == "gsea") {
-        selectInput("enrichment_direction", "Direction of Change for Enrichment",
+        selectInput(session$ns("enrichment_direction"), "Direction of Change for Enrichment",
           choices = c("both"), multiple = FALSE, selected = "both")
       } else if (input$enrichment_type == "ora") {
-        selectInput("enrichment_direction", "Direction of Change for Enrichment",
+        selectInput(session$ns("enrichment_direction"), "Direction of Change for Enrichment",
           choices = c("up", "down"), multiple = FALSE, selected = "up")
       }
     })
@@ -61,14 +61,14 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
       bslib::value_box(
         title    = paste(method_label, "Enriched Terms"),
         value    = n_terms,
-        showcase = bsicons::bs_icon("list-check"),
+        showcase = icon("list-check"),
         theme    = if (n_terms > 0) "success" else "secondary",
         p(paste("Significant terms found using", input$annotation_type, "annotations"))
       )
     })
 
     enrichment_plot <- reactive({
-      req(enrichment_results())
+      req(enrichment_results(), input$enrichment_plot_type)
       if (input$enrichment_plot_type == "ridgeplot") {
         enrichplot::ridgeplot(enrichment_results())
       } else if (input$enrichment_plot_type == "dotplot") {

@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
+.claude/
 conduit-GUI.Rproj
 rsconnect/*
 test/*.rds
