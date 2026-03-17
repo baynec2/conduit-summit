@@ -41,11 +41,7 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
       )
     ),
     tagList(
-      shinycssloaders::withSpinner(
-        verbatimTextOutput(ns("enrichment_summary")),
-        type = 8, caption = "Calculating Enrichment Results...",
-        color = "#15131e"
-      ),
+      uiOutput(ns("enrichment_summary_card")),
       bslib::card(
         full_screen = TRUE,
         class       = "card-light",
