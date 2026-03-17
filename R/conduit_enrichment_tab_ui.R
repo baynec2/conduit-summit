@@ -12,6 +12,13 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
         tagList(icon("arrow-left"), " Return to Stats"),
         class = "btn-outline-secondary btn-sm w-100 mb-3"
       ),
+      tags$div(
+        class = "alert alert-info p-2 mb-3",
+        style = "font-size: 0.8rem; line-height: 1.4;",
+        icon("circle-info", style = "margin-right: 4px;"),
+        "Results use the formula and contrast configured in the ",
+        tags$strong("Statistics"), " tab."
+      ),
       selectInput(
         ns("annotation_type"), "Term Type",
         choices = c("go", "kegg", "domain", "kingdom", "phylum", "class",
