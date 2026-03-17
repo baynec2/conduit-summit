@@ -1,0 +1,72 @@
+conduit_traverse_server <- function(id, conduit_obj, qf, colData) {
+  moduleServer(id, function(input, output, session) {
+
+    observe({
+      req(qf(), input$traverse_features)
+      updateSelectInput(session, inputId = "traverse_assay", choices = names(qf()))
+    })
+
+    observe({
+      req(colData())
+      updateSelectInput(session, inputId = "traverse_xaxis", choices = names(colData()))
+    })
+
+    selected_se_subset <- eventReactive(input$apply_traverse, {
+      req(qf(), input$traverse_features)
+      qf()[input$traverse_features, ]
+    })
+
+    traverse_data <- reactive({
+      req(selected_se_subset(), input$traverse_assay)
+
+      se <- selected_se_subset()[[input$traverse_assay]]
+
+      cd <- colData() |>
+        as.data.frame() |>
+        tibble::rownames_to_column("sample")
+
+      assay_df <- as.data.frame(SummarizedExperiment::assay(se)) |>
+        tibble::rownames_to_column("feature_id") |>
+        tidyr::pivot_longer(
+          cols = everything()[-1],
+          names_to = "sample",
+          values_to = "intensity"
+        )
+
+      dplyr::left_join(assay_df, cd, by = "sample")
+    })
+
+    output$qf_plot <- plotly::renderPlotly({
+      req(conduit_obj())
+      plot(conduit_obj()@QFeatures, interactive = TRUE)
+    })
+
+    output$traverse_info <- DT::renderDT({
+      shiny::validate(
+        shiny::need(input$apply_traverse > 0, "Enter a feature and click \u201cApply\u201d to see feature details.")
+      )
+      req(selected_se_subset())
+      se <- selected_se_subset()
+      dims <- sapply(SummarizedExperiment::assays(se), dim)
+      rownames(dims) <- c("# Features", "# Samples")
+      conduit_datatable(as.data.frame(dims[1, ]))
+    })
+
+    traverse_plot <- reactive({
+      req(traverse_data(), input$traverse_xaxis)
+      traverse_data() |>
+        ggplot2::ggplot(ggplot2::aes(!!rlang::sym(input$traverse_xaxis), y = intensity)) +
+        ggplot2::geom_point() +
+        ggplot2::ylab(paste(input$traverse_assay, " Intensity"))
+    })
+
+    output$traverse_plot <- renderPlot({
+      if (input$apply_traverse == 0) {
+        return(waiting_plot("Enter a feature and click \u201cApply\u201d to generate the plot"))
+      }
+      traverse_plot()
+    })
+
+    return(traverse_plot)
+  })
+}
