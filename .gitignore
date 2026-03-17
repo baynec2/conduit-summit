@@ -3,6 +3,9 @@
 .RData
 .Ruserdata
 .DS_Store
+.claude/
 conduit-GUI.Rproj
 rsconnect/*
 test/*.rds
+tests/testthat/_snaps/
+Rplots.pdf

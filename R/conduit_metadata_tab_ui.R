@@ -1,53 +1,57 @@
-conduit_metadata_tab_ui = function(){
-  tabItem(
-    "view_metadata",
-    fluidRow(
-      box(
-        solidHeader = TRUE,
-        title = "Metadata Metrics",
-        background = NULL,
-        width = 12,
-        status = "info",
-        footer = fluidRow(
-          column(
-            width = 3,
-            descriptionBlock(
-              text = "# of Variables",
-              header = textOutput("num_sample_md_variables"),
-              rightBorder = TRUE,
-              marginBottom = FALSE
-            )
-          ),
-          column(
-            width = 3,
-            descriptionBlock(
-              text = "# Continuous",
-              header = textOutput("num_continuous_variables"),
-              rightBorder = FALSE,
-              marginBottom = FALSE
-            )
-          ),
-          column(
-            width = 3,
-            descriptionBlock(
-              text = "# Discrete",
-              header = textOutput("num_discrete_variables"),
-              rightBorder = FALSE,
-              marginBottom = FALSE
-            )
-          )
-        )
+conduit_metadata_tab_ui <- function(id = "view_metadata") {
+  ns <- NS(id)
+  tagList(
+    bslib::layout_columns(
+      col_widths = c(4, 4, 4),
+      bslib::value_box(
+        title    = "# of Variables",
+        value    = textOutput(ns("num_sample_md_variables")),
+        showcase = icon("table"),
+        theme    = "primary"
       ),
-      fluidRow(
-        column(width = 6,
-        DT::DTOutput("colData",width = "100%")
+      bslib::value_box(
+        title    = "# Continuous",
+        value    = textOutput(ns("num_continuous_variables")),
+        showcase = icon("wave-square"),
+        theme    = "primary"
+      ),
+      bslib::value_box(
+        title    = "# Discrete",
+        value    = textOutput(ns("num_discrete_variables")),
+        showcase = icon("list"),
+        theme    = "primary"
+      )
+    ),
+    bslib::layout_sidebar(
+      sidebar = bslib::sidebar(
+        title    = "Plot Controls",
+
+        width    = 260,
+        bg       = "#f8f9fb",
+        fg       = "#1a1a2e",
+        uiOutput(ns("metadata_variable_choices_to_plot_ui"))
+      ),
+      tagList(
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Distribution of Selected Variable"),
+          bslib::card_body(
+            plotOutput(ns("metadata_distribution_plot"), height = "420px")
+          )
         ),
-        column(width = 6,
-               uiOutput("metadata_variable_choices_to_plot_ui"),  # Proper way to include dynamic selectInput
-               plotOutput("metadata_distribution_plot")
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Sample Metadata"),
+          bslib::card_body(
+            DT::dataTableOutput(ns("colData"), height = "380px")
+          ),
+          bslib::card_footer(
+            downloadButton(ns("download_colData_table"), "Download Table")
+          )
         )
       )
     )
   )
-
 }
