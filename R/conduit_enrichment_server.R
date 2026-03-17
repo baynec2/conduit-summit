@@ -53,13 +53,18 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
       }
     })
 
-    output$enrichment_summary <- renderPrint({
-      if (input$run_enrichment == 0) {
-        cat("Configure settings and click \u201cRun Enrichment\u201d to see results.")
-        return(invisible(NULL))
-      }
+    output$enrichment_summary_card <- renderUI({
+      if (input$run_enrichment == 0) return(NULL)
       req(enrichment_results())
-      enrichment_results()
+      n_terms <- nrow(as.data.frame(enrichment_results()))
+      method_label <- if (input$enrichment_type == "gsea") "GSEA" else "ORA"
+      bslib::value_box(
+        title    = paste(method_label, "Enriched Terms"),
+        value    = n_terms,
+        showcase = bsicons::bs_icon("list-check"),
+        theme    = if (n_terms > 0) "success" else "secondary",
+        p(paste("Significant terms found using", input$annotation_type, "annotations"))
+      )
     })
 
     enrichment_plot <- reactive({
