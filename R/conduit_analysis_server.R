@@ -296,6 +296,161 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     })
 
     ##########################################################################
+    # Explore
+    ##########################################################################
+
+    # Long-format data: intensity + all colData + all rowData columns
+    explore_long_data <- reactive({
+      req(final_qf(), processed_assay())
+      se  <- final_qf()[[processed_assay()]]
+      mat <- SummarizedExperiment::assay(se)
+
+      df <- as.data.frame(mat) |>
+        tibble::rownames_to_column("feature") |>
+        tidyr::pivot_longer(-feature, names_to = "sample", values_to = "intensity")
+
+      col_df <- as.data.frame(SummarizedExperiment::colData(se)) |>
+        tibble::rownames_to_column("sample")
+
+      row_df <- as.data.frame(SummarizedExperiment::rowData(se)) |>
+        tibble::rownames_to_column("feature")
+
+      df |>
+        dplyr::left_join(col_df, by = "sample") |>
+        dplyr::left_join(row_df, by = "feature", suffix = c("", "_feature"))
+    })
+
+    # Holds the last successfully applied summarised data frame (NULL = no grouping applied)
+    explore_summarized_data <- reactiveVal(NULL)
+
+    observeEvent(input$explore_apply, {
+      df         <- req(explore_long_data())
+      group_vars <- intersect(input$explore_group_by, names(df))
+      if (length(group_vars) == 0) {
+        explore_summarized_data(NULL)
+        return()
+      }
+      fn_name   <- if (!is.null(input$explore_summary_fn)) input$explore_summary_fn else "mean"
+      value_col <- paste0(fn_name, "_intensity")
+      grouped   <- dplyr::group_by(df, dplyr::across(dplyr::all_of(group_vars)))
+      result <- if (fn_name == "n") {
+        dplyr::summarise(grouped, !!value_col := dplyr::n(), .groups = "drop")
+      } else {
+        summary_fn <- switch(fn_name,
+          mean   = function(x) mean(x,   na.rm = TRUE),
+          median = function(x) median(x, na.rm = TRUE),
+          sum    = function(x) sum(x,    na.rm = TRUE),
+          sd     = function(x) sd(x,     na.rm = TRUE)
+        )
+        dplyr::summarise(grouped, !!value_col := summary_fn(intensity), .groups = "drop")
+      }
+      explore_summarized_data(result)
+    })
+
+    # Data actually sent to the plot: summarised if Apply was used, otherwise raw
+    explore_plot_data <- reactive({
+      req(explore_long_data())
+      summarized <- explore_summarized_data()
+      if (is.null(summarized)) explore_long_data() else summarized
+    })
+
+    # Column names that exist in the current plot data
+    explore_plot_cols <- reactive({
+      req(explore_plot_data())
+      names(explore_plot_data())
+    })
+
+    # Group-by: selectize so users can type variable names; starts blank
+    output$explore_group_by_ui <- renderUI({
+      req(explore_long_data())
+      choices <- setdiff(names(explore_long_data()), "intensity")
+      selectizeInput(session$ns("explore_group_by"), "Group by",
+        choices  = choices,
+        selected = NULL,
+        multiple = TRUE,
+        options  = list(create = TRUE, placeholder = "Select or type variable names...")
+      )
+    })
+
+    output$explore_x_axis_ui <- renderUI({
+      req(explore_plot_cols())
+      cols      <- explore_plot_cols()
+      default_x <- intersect(final_colData_names(), cols)
+      default_x <- if (length(default_x) > 0) default_x[[1]] else cols[[1]]
+      selectInput(session$ns("explore_x_axis"), "X axis",
+        choices = cols, selected = default_x)
+    })
+
+    output$explore_y_axis_ui <- renderUI({
+      req(explore_plot_cols(), input$explore_plot_type)
+      if (input$explore_plot_type == "histogram") return(NULL)
+      cols      <- explore_plot_cols()
+      default_y <- if ("intensity" %in% cols) "intensity" else cols[[length(cols)]]
+      selectInput(session$ns("explore_y_axis"), "Y axis",
+        choices = cols, selected = default_y)
+    })
+
+    output$explore_color_ui <- renderUI({
+      req(explore_plot_cols())
+      selectInput(session$ns("explore_color"), "Color variable",
+        choices = c("none" = "", explore_plot_cols()), selected = "")
+    })
+
+    output$explore_shape_ui <- renderUI({
+      req(explore_plot_cols(), input$explore_plot_type)
+      if (input$explore_plot_type != "scatter") return(NULL)
+      selectInput(session$ns("explore_shape"), "Shape variable",
+        choices = c("none" = "", explore_plot_cols()), selected = "")
+    })
+
+    explore_plot <- reactive({
+      req(explore_plot_data(), input$explore_x_axis, input$explore_plot_type)
+
+      df        <- explore_plot_data()
+      plot_type <- input$explore_plot_type
+      x_var     <- input$explore_x_axis
+      color_var <- input$explore_color
+
+      p <- ggplot2::ggplot(df) + ggplot2::aes(x = .data[[x_var]])
+
+      if (plot_type != "histogram") {
+        req(input$explore_y_axis)
+        p <- p + ggplot2::aes(y = .data[[input$explore_y_axis]])
+      }
+
+      if (!is.null(color_var) && nzchar(color_var)) {
+        p <- p + ggplot2::aes(color = .data[[color_var]])
+      }
+
+      p <- p + switch(plot_type,
+        scatter   = ggplot2::geom_point(alpha = 0.7),
+        bar       = ggplot2::geom_bar(stat = "identity"),
+        line      = ggplot2::geom_line(ggplot2::aes(group = 1)),
+        boxplot   = ggplot2::geom_boxplot(),
+        violin    = ggplot2::geom_violin(),
+        histogram = ggplot2::geom_histogram(bins = 30, fill = "#3B528BFF", color = "white")
+      )
+
+      if (plot_type == "scatter" && !is.null(input$explore_shape) && nzchar(input$explore_shape)) {
+        p <- p + ggplot2::aes(shape = .data[[input$explore_shape]])
+      }
+
+      facet_str <- gsub("\\s+", "", input$explore_facet_formula)
+      if (!is.null(facet_str) && nzchar(facet_str) && !facet_str %in% c("~NULL", "~null")) {
+        tryCatch(
+          p <- p + ggplot2::facet_wrap(as.formula(input$explore_facet_formula)),
+          error = function(e) NULL
+        )
+      }
+
+      p + theme_conduit()
+    })
+
+    output$explore_plot <- renderPlot({
+      explore_plot()
+    })
+
+    ##########################################################################
     # Statistics
     ##########################################################################
 
@@ -406,13 +561,13 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     output$selected_feature_plot_color_ui <- renderUI({
       req(final_colData_and_rowData_names())
       selectInput(session$ns("selected_feature_plot_color"), "Choose color",
-        choices = c("none" = "", final_colData_and_rowData_names()), multiple = FALSE, selected = "")
+        choices = c("none" = "none", final_colData_and_rowData_names()), multiple = FALSE, selected = "none")
     })
 
     output$selected_feature_plot_shape_ui <- renderUI({
       req(final_colData_and_rowData_names())
       selectInput(session$ns("selected_feature_plot_shape"), "Choose shape",
-        choices = c("none" = "", final_colData_and_rowData_names()), multiple = FALSE, selected = "")
+        choices = c("none" = "none", final_colData_and_rowData_names()), multiple = FALSE, selected = "none")
     })
 
     selected_features <- reactive({
@@ -424,15 +579,14 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     selected_feature_plot <- reactive({
       req(selected_features(), processed_assay(), input$selected_feature_plot_x_axis,
-          input$selected_feature_plot_color, input$selected_feature_plot_shape,
           input$selected_feature_plot_facet_formula)
       conduitR::plot_selected_features(
         final_qf(),
         assay_name = processed_assay(),
         features = selected_features(),
         x_axis = input$selected_feature_plot_x_axis,
-        color_by = input$selected_feature_plot_color,
-        shape = input$selected_feature_plot_shape,
+        color_by = if (input$selected_feature_plot_color != "none") input$selected_feature_plot_color else NULL,
+        shape = if (input$selected_feature_plot_shape != "none") input$selected_feature_plot_shape else NULL,
         facet_formula = as.formula(input$selected_feature_plot_facet_formula)
       )
     })
@@ -474,7 +628,8 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       relative_abundance_plot = relative_abundance_plot,
       selected_feature_plot = selected_feature_plot,
       enrichment_plot = enrichment_plot,
-      pathway_plot = pathway_plot
+      pathway_plot = pathway_plot,
+      explore_plot = explore_plot
     ))
   })
 }
