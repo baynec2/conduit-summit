@@ -1,4 +1,5 @@
 conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
+                                       fc_threshold, p_threshold,
                                        session_parent) {
   moduleServer(id, function(input, output, session) {
 
@@ -37,17 +38,17 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
           ranking_column = "logFC"
         )
       } else if (input$enrichment_type == "ora") {
-        req(input$enrichment_direction, input$limma_fc_threshold)
+        req(input$enrichment_direction, fc_threshold())
         conduitR::perform_ora(
           limma_stats_results(),
           direction = input$enrichment_direction,
           conduit = conduit_obj(),
           annotation_type = input$annotation_type,
-          adj_pval_threshold = input$limma_p_threshold,
+          adj_pval_threshold = p_threshold(),
           logFC_threshold = if (input$enrichment_direction == "down") {
-            input$limma_fc_threshold * -1
+            fc_threshold() * -1
           } else {
-            input$limma_fc_threshold
+            fc_threshold()
           }
         )
       }
@@ -95,9 +96,7 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
     })
 
     return(list(
-      enrichment_plot    = enrichment_plot,
-      limma_fc_threshold = reactive(input$limma_fc_threshold),
-      limma_p_threshold  = reactive(input$limma_p_threshold)
+      enrichment_plot = enrichment_plot
     ))
   })
 }

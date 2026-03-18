@@ -498,11 +498,11 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       "enrichment",
       conduit_obj         = conduit_obj,
       limma_stats_results = limma_stats_results,
+      fc_threshold        = reactive(input$limma_fc_threshold),
+      p_threshold         = reactive(input$limma_p_threshold),
       session_parent      = session_parent
     )
-    enrichment_plot         <- enrichment_results$enrichment_plot
-    enrichment_fc_threshold <- enrichment_results$limma_fc_threshold
-    enrichment_p_threshold  <- enrichment_results$limma_p_threshold
+    enrichment_plot <- enrichment_results$enrichment_plot
 
     pathway_plot <- conduit_pathway_server(
       "pathway",
@@ -522,23 +522,144 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       )
     })
 
-    limma_volcano_plot <- reactive({
-      req(limma_stats_results(), input$limma_volcano_facet_formula)
-      fc <- if (!is.null(enrichment_fc_threshold())) enrichment_fc_threshold() else 0
-      pv <- if (!is.null(enrichment_p_threshold()))  enrichment_p_threshold()  else 0.05
-      conduitR::plot_volcano(
-        limma_stats_results(),
-        facet_formula = as.formula(input$limma_volcano_facet_formula),
-        color_by = input$limma_volcano_color,
-        pval_threshold = pv
-      ) +
-        ggplot2::geom_vline(xintercept = fc, linetype = "dashed", color = "red") +
-        ggplot2::geom_vline(xintercept = -fc, linetype = "dashed", color = "red")
+    # Track proteins selected by clicking the volcano plot
+    volcano_clicked_ids <- reactiveVal(character(0))
+
+    observeEvent(input$run_limma, {
+      volcano_clicked_ids(character(0))
     })
 
-    output$limma_volcano_plot <- renderPlot({
+    observeEvent(input$clear_volcano_selection, {
+      volcano_clicked_ids(character(0))
+    })
+
+    observeEvent(plotly::event_data("plotly_click", source = "volcano"), {
+      click <- plotly::event_data("plotly_click", source = "volcano")
+      req(click, limma_stats_results())
+      matched <- limma_stats_results() |>
+        dplyr::filter(
+          abs(logFC - click$x) < 1e-9,
+          abs(neg_log10.adj.P.Val - click$y) < 1e-9
+        ) |>
+        dplyr::pull(id)
+      if (length(matched) > 0) {
+        current <- volcano_clicked_ids()
+        id <- matched[1]
+        if (id %in% current) {
+          volcano_clicked_ids(current[current != id])
+        } else {
+          volcano_clicked_ids(c(current, id))
+        }
+      }
+    })
+
+    limma_volcano_plot <- reactive({
+      req(limma_stats_results(), input$limma_volcano_facet_formula)
+      fc <- if (!is.null(input$limma_fc_threshold)) input$limma_fc_threshold else 0
+      pv <- if (!is.null(input$limma_p_threshold))  input$limma_p_threshold  else 0.05
+
+      color_by  <- if (!is.null(input$limma_volcano_color) && input$limma_volcano_color != "") input$limma_volcano_color else NULL
+      facet_str <- input$limma_volcano_facet_formula
+
+      data <- limma_stats_results()
+
+      # Build hover tooltip (after arrange so indices match)
+      tip <- paste0("<b>", data$id, "</b>")
+      if ("Protein.Names" %in% names(data))
+        tip <- paste0(tip, "<br>Protein: ", data$Protein.Names)
+      if ("species" %in% names(data))
+        tip <- paste0(tip, "<br>Species: ", data$species)
+      if ("Genes" %in% names(data))
+        tip <- paste0(tip, "<br>Gene: ", data$Genes)
+
+      # Reference lines as layout shapes
+      hline_y <- -log10(pv)
+      shapes <- list(
+        list(type = "line", x0 = 0, x1 = 1, xref = "paper",
+             y0 = hline_y, y1 = hline_y,
+             line = list(color = "#888888", dash = "dash", width = 1)),
+        list(type = "line", y0 = 0, y1 = 1, yref = "paper",
+             x0 =  fc, x1 =  fc,
+             line = list(color = "#888888", dash = "dash", width = 1)),
+        list(type = "line", y0 = 0, y1 = 1, yref = "paper",
+             x0 = -fc, x1 = -fc,
+             line = list(color = "#888888", dash = "dash", width = 1))
+      )
+
+      use_facet <- !is.null(facet_str) && facet_str != "" && facet_str != "~NULL"
+      facet_col <- if (use_facet) trimws(sub("^~", "", facet_str)) else NULL
+
+      make_trace <- function(d, t, src = NULL) {
+        if (!is.null(color_by)) {
+          plotly::plot_ly(source = src) |>
+            plotly::add_trace(
+              data      = d,
+              type      = "scattergl",
+              mode      = "markers",
+              x         = ~logFC,
+              y         = ~neg_log10.adj.P.Val,
+              color     = ~.data[[color_by]],
+              text      = t,
+              hoverinfo = "text",
+              marker    = list(opacity = 0.35, size = 6)
+            )
+        } else {
+          plotly::plot_ly(
+            data      = d,
+            type      = "scattergl",
+            mode      = "markers",
+            x         = ~logFC,
+            y         = ~neg_log10.adj.P.Val,
+            text      = t,
+            hoverinfo = "text",
+            marker    = list(color = "rgba(0,0,0,0.35)", size = 6),
+            source    = src
+          )
+        }
+      }
+
+      if (use_facet && !is.null(facet_col) && facet_col %in% names(data)) {
+        groups <- split(seq_len(nrow(data)), data[[facet_col]])
+        p <- plotly::subplot(
+          lapply(names(groups), function(grp) {
+            idx      <- groups[[grp]]
+            sub_data <- data[idx, ]
+            sub_tip  <- tip[idx]
+            make_trace(sub_data, sub_tip) |>
+              plotly::layout(
+                shapes = shapes,
+                annotations = list(list(
+                  text = grp, x = 0.5, xref = "paper", xanchor = "center",
+                  y = 1.02, yref = "paper", showarrow = FALSE
+                ))
+              )
+          }),
+          shareX = TRUE, shareY = TRUE, titleX = TRUE, titleY = TRUE
+        )
+      } else {
+        p <- make_trace(data, tip, src = "volcano") |>
+          plotly::layout(
+            xaxis  = list(title = "log<sub>2</sub> Fold Change"),
+            yaxis  = list(title = "-log<sub>10</sub> adj. p-value"),
+            shapes = shapes,
+            legend = list(orientation = "v")
+          )
+      }
+
+      p
+    })
+
+    output$limma_volcano_plot <- plotly::renderPlotly({
       if (input$run_limma == 0) {
-        return(waiting_plot("Fill in the formula and contrast, then click \u201cRun Analysis\u201d"))
+        return(plotly::plotly_empty() |>
+          plotly::layout(
+            annotations = list(list(
+              text      = "Fill in the formula and contrast, then click \u201cRun Analysis\u201d",
+              x = 0.5, y = 0.5, xref = "paper", yref = "paper",
+              showarrow = FALSE, font = list(size = 14, color = "#888888")
+            ))
+          )
+        )
       }
       limma_volcano_plot()
     })
@@ -555,7 +676,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     })
 
     output$selected_feature_plot_facet_formula_ui <- renderUI({
-      textInput(session$ns("selected_feature_plot_facet_formula"), "Choose facet formula", value = "~ NULL")
+      textInput(session$ns("selected_feature_plot_facet_formula"), "Choose facet formula", value = "~ rowid")
     })
 
     output$selected_feature_plot_color_ui <- renderUI({
@@ -571,10 +692,16 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     })
 
     selected_features <- reactive({
-      req(limma_stats_results(), input$limma_statistics_table_rows_selected)
-      limma_stats_results() |>
-        dplyr::slice(input$limma_statistics_table_rows_selected) |>
-        dplyr::pull(id)
+      req(limma_stats_results())
+      table_ids <- character(0)
+      if (!is.null(input$limma_statistics_table_rows_selected)) {
+        table_ids <- limma_stats_results() |>
+          dplyr::slice(input$limma_statistics_table_rows_selected) |>
+          dplyr::pull(id)
+      }
+      combined <- unique(c(table_ids, volcano_clicked_ids()))
+      req(length(combined) > 0)
+      combined
     })
 
     selected_feature_plot <- reactive({
@@ -593,22 +720,15 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     output$selected_feature_plot <- renderPlot({
       if (input$run_limma == 0) {
-        return(waiting_plot("Run analysis, then select a feature from the statistics table"))
+        return(waiting_plot("Run analysis, then select a feature from the table or click a volcano point"))
       }
-      if (is.null(input$limma_statistics_table_rows_selected)) {
-        return(waiting_plot("Select a feature row from the statistics table"))
+      if (is.null(input$limma_statistics_table_rows_selected) && length(volcano_clicked_ids()) == 0) {
+        return(waiting_plot("Click a point on the volcano plot or select a row from the statistics table"))
       }
       selected_feature_plot()
     })
 
     # Tab navigation to enrichment/pathway (within the analysis card)
-    observeEvent(input$enrichment_analysis_button, {
-      bslib::nav_select("analysis_tabs", "Enrichment", session = session_parent)
-    })
-
-    observeEvent(input$pathway_analysis_button, {
-      bslib::nav_select("analysis_tabs", "Pathway", session = session_parent)
-    })
 
     ##########################################################################
     # Returns for download handler, enrichment, and pathway
@@ -616,8 +736,6 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     return(list(
       limma_stats_results = limma_stats_results,
       limma_volcano_plot = limma_volcano_plot,
-      limma_fc_threshold = enrichment_fc_threshold,
-      limma_p_threshold  = enrichment_p_threshold,
       feature_number_plot = feature_number_plot,
       missing_value_plot = missing_value_plot,
       sample_cor_heatmap = sample_cor_heatmap,

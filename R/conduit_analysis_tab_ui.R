@@ -208,19 +208,11 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             bslib::accordion_panel(
               "Volcano Options", icon = icon("chart-simple"),
               textInput(ns("limma_volcano_facet_formula"), "Facet formula", value = "~NULL"),
-              uiOutput(ns("limma_volcano_color_ui"))
-            ),
-            bslib::accordion_panel(
-              "Feature Selection", icon = icon("sliders"),
-              actionButton(
-                ns("enrichment_analysis_button"),
-                tagList(icon("network-wired"), " Enrichment Analysis"),
-                class = "btn-outline-primary btn-sm w-100 mb-1"
-              ),
-              actionButton(
-                ns("pathway_analysis_button"),
-                tagList(icon("diagram-project"), " Pathway Analysis"),
-                class = "btn-outline-primary btn-sm w-100"
+              uiOutput(ns("limma_volcano_color_ui")),
+              numericInput(ns("limma_fc_threshold"), "LogFC threshold", value = 1, min = 0),
+              sliderInput(
+                ns("limma_p_threshold"), "Adjusted p-value threshold",
+                min = 0, max = 1, value = 0.05, step = 0.01
               )
             ),
             bslib::accordion_panel(
@@ -233,7 +225,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
                 ns("selected_feature_plot_data_type_ui"), "Data type",
                 choices  = c("", "_log2", "_log2_imputed", "_log2_imputed_norm"),
                 selected = "_log2_imputed"
-              )
+              ),
             )
           )
         ),
@@ -246,7 +238,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
               bslib::card_header("Volcano Plot"),
               bslib::card_body(
                 shinycssloaders::withSpinner(
-                  plotOutput(ns("limma_volcano_plot"), height = "480px"),
+                  plotly::plotlyOutput(ns("limma_volcano_plot"), height = "480px"),
                   type = 8, caption = "Loading volcano plot...", color = "#15131e"
                 )
               )
@@ -254,7 +246,15 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             bslib::card(
               full_screen = TRUE,
               class       = "card-light",
-              bslib::card_header("Selected Feature Plot"),
+              bslib::card_header(
+                class = "d-flex justify-content-between align-items-center",
+                "Selected Feature Plot",
+                actionButton(
+                  ns("clear_volcano_selection"),
+                  tagList(icon("xmark"), " Clear Selection"),
+                  class = "btn-outline-secondary btn-sm"
+                )
+              ),
               bslib::card_body(
                 shinycssloaders::withSpinner(
                   plotOutput(ns("selected_feature_plot"), height = "480px"),
@@ -321,68 +321,13 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             choices = c("ROC", "precision_recall")
           ),
           hr(),
+          uiOutput("model_status_banner"),
           actionButton(
             "run_classification_model", "Run Model",
             icon = icon("cogs"), class = "btn-primary w-100"
           )
         ),
-        tagList(
-          bslib::layout_columns(
-            col_widths = c(6, 6),
-            bslib::card(
-              full_screen = TRUE,
-              class       = "card-light",
-              bslib::card_header("Confusion Matrix"),
-              bslib::card_body(
-                shinycssloaders::withSpinner(
-                  plotOutput("confusion_matrix_plot", height = "400px"),
-                  type = 8, caption = "Loading confusion matrix...", color = "#15131e"
-                )
-              )
-            ),
-            bslib::layout_columns(
-              col_widths = c(12, 12),
-              bslib::card(
-                full_screen = TRUE,
-                class       = "card-light",
-                bslib::card_header("Test Set"),
-                bslib::card_body(
-                  shinycssloaders::withSpinner(
-                    plotOutput("test_plot", height = "185px"),
-                    type = 8, color = "#15131e"
-                  )
-                )
-              ),
-              bslib::card(
-                full_screen = TRUE,
-                class       = "card-light",
-                bslib::card_header("Training Set"),
-                bslib::card_body(
-                  shinycssloaders::withSpinner(
-                    plotOutput("train_plot", height = "185px"),
-                    type = 8, color = "#15131e"
-                  )
-                )
-              )
-            )
-          ),
-          bslib::card(
-            class = "card-light",
-            bslib::card_header("Feature Importance Rank"),
-            bslib::card_body(uiOutput("features_to_show_slider_ui"))
-          ),
-          bslib::card(
-            full_screen = TRUE,
-            class       = "card-light",
-            bslib::card_header("Feature Importance"),
-            bslib::card_body(
-              shinycssloaders::withSpinner(
-                plotOutput("feature_importance_plot", height = "500px"),
-                type = 8, color = "#15131e"
-              )
-            )
-          )
-        )
+        uiOutput("prediction_main_content")
       )
     )
   )

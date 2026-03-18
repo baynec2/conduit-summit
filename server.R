@@ -2,6 +2,8 @@ library(shiny)
 library(conduitR)
 library(waiter)
 library(digest)
+library(future)
+future::plan(multisession)
 # Server
 server <- function(input, output, session) {
   ##############################################################################
@@ -313,154 +315,275 @@ server <- function(input, output, session) {
     SummarizedExperiment::colData(final_qf())
   })
 
-  numeric_colData_names <- reactive({
-    req(final_colData(), final_colData_names())
-    final_colData_names()[sapply(final_colData(), is.numeric)]
-  })
-
-  non_numeric_colData_names <- reactive({
-    req(final_colData(), final_colData_names())
-    final_colData_names()[sapply(final_colData(), function(x) !is.numeric(x))]
-  })
-
-  # UI For Selecting the Outcome variable
+  # Populate outcome variable with all colData columns
   observe({
-    req(non_numeric_colData_names())
-    updateSelectInput(
-      session,
-      inputId = "outcome_var",
-      choices = non_numeric_colData_names(),
-      selected = NULL
+    req(final_colData_names())
+    updateSelectInput(session, "outcome_var", choices = final_colData_names(), selected = NULL)
+  })
+
+  # Detect outcome type from the selected variable
+  outcome_type <- reactive({
+    req(input$outcome_var, final_colData())
+    col <- final_colData()[[input$outcome_var]]
+    if (is.numeric(col)) "regression"
+    else if (nlevels(as.factor(col)) == 2) "binary_classification"
+    else "multiclass_classification"
+  })
+
+  # Show/hide plot type selector — only relevant for binary classification
+  observe({
+    req(outcome_type())
+    if (outcome_type() == "binary_classification") {
+      shinyjs::show("model_plot_type")
+    } else {
+      shinyjs::hide("model_plot_type")
+    }
+  })
+
+  # Async model task
+  model_task <- ExtendedTask$new(function(qf, assay_name, outcome, train_pct,
+                                          model_type, cv_folds, seed, otype) {
+    future::future({
+      withr::with_seed(seed, {
+        if (otype == "regression") {
+          conduitR::predict_regression(
+            qf, assay_name, outcome, train_pct, model_type, cv_folds
+          )
+        } else {
+          conduitR::predict_classification(
+            qf, assay_name, outcome, train_pct, model_type, cv_folds
+          )
+        }
+      })
+    })
+  })
+
+  observeEvent(input$run_classification_model, {
+    req(
+      final_qf(), processed_assay(), input$outcome_var, input$split_ratio,
+      input$model_type, input$cv_folds, input$random_seed, outcome_type()
+    )
+    model_task$invoke(
+      final_qf(), processed_assay(), input$outcome_var,
+      input$split_ratio, input$model_type, input$cv_folds,
+      input$random_seed, outcome_type()
     )
   })
 
-  predict_classification_list <- eventReactive(input$run_classification_model, {
-    req(
-      final_qf(),
-      processed_assay(),
-      input$outcome_var,
-      input$split_ratio,
-      input$model_type,
-      input$cv_folds,
-      input$random_seed
+  observeEvent(input$cancel_model, {
+    model_task$cancel()
+  })
+
+  # Sidebar status banner — shown while running or on error
+  output$model_status_banner <- renderUI({
+    status <- model_task$status()
+    switch(status,
+      running = tagList(
+        tags$div(
+          class = "alert alert-info p-2 mb-2 small",
+          style = "border-radius:6px;",
+          tags$strong("Model is running...")
+        ),
+        actionButton(
+          "cancel_model", "Cancel",
+          icon = icon("times"), class = "btn-danger w-100 mb-2"
+        )
+      ),
+      error = tags$div(
+        class = "alert alert-danger p-2 mb-2 small",
+        style = "border-radius:6px;",
+        tags$strong("Error: "),
+        conditionMessage(model_task$result())
+      ),
+      NULL
     )
+  })
 
-    message <- HTML(paste0(
-      "<p>Your <b>",
-      selected_assay(),
-      "</b> data is being used to generate a classification model with the following parameters:</p>",
-      "<ul>",
-      "<li><b>Model Type:</b> ",
-      input$model_type,
-      "</li>",
-      "<li><b>Outcome Variable:</b> ",
-      input$outcome_var,
-      "</li>",
-      "<li><b>Train/Test Split Percentage:</b> ",
-      input$split_ratio,
-      "</li>",
-      "<li><b>Cross-Validation Folds:</b> ",
-      input$cv_folds,
-      "</li>",
-      "</ul>",
-      "<p>Please wait while the model is generated...</p>"
-    ))
+  # Returns the task result (reactive — updates when task finishes)
+  model_result <- reactive({
+    model_task$result()
+  })
 
-    shinyalert::shinyalert(
-      title = "Generating Model",
-      text = message,
-      type = "info",
-      html = TRUE,
-      showCancelButton = FALSE,
-      closeOnClickOutside = FALSE,
-      showConfirmButton = FALSE,
-      size = "l"
+  # Helper: returns a waiting_plot for any non-success state, NULL on success
+  model_waiting_plot <- reactive({
+    switch(model_task$status(),
+      idle      = waiting_plot("Configure settings and click \u201cRun Model\u201d"),
+      running   = waiting_plot("Model is running\u2026"),
+      cancelled = waiting_plot("Model run was cancelled"),
+      error     = waiting_plot(paste("Error:", conditionMessage(model_result()))),
+      NULL
     )
+  })
 
-    result <- withr::with_seed(
-      input$random_seed,
-      conduitR::predict_classification(
-        final_qf(),
-        assay_name = processed_assay(),
-        outcome = input$outcome_var,
-        train_percent = input$split_ratio,
-        model_type = input$model_type,
-        v = input$cv_folds
+  # Dynamic main content — layout changes based on outcome type
+  output$prediction_main_content <- renderUI({
+    req(outcome_type())
+    otype <- outcome_type()
+
+    feature_importance_cards <- tagList(
+      bslib::card(
+        class = "card-light",
+        bslib::card_header("Feature Importance Rank"),
+        bslib::card_body(uiOutput("features_to_show_slider_ui"))
+      ),
+      bslib::card(
+        full_screen = TRUE,
+        class       = "card-light",
+        bslib::card_header("Feature Importance"),
+        bslib::card_body(
+          shinycssloaders::withSpinner(
+            plotOutput("feature_importance_plot", height = "500px"),
+            type = 8, color = "#15131e"
+          )
+        )
       )
     )
 
-    shinyalert::closeAlert()
-    result
+    if (otype == "regression") {
+      tagList(
+        bslib::layout_columns(
+          col_widths = c(6, 6),
+          bslib::card(
+            full_screen = TRUE,
+            class       = "card-light",
+            bslib::card_header("Test Set \u2014 Predicted vs Actual"),
+            bslib::card_body(
+              shinycssloaders::withSpinner(
+                plotOutput("test_plot", height = "400px"),
+                type = 8, color = "#15131e"
+              )
+            )
+          ),
+          bslib::card(
+            full_screen = TRUE,
+            class       = "card-light",
+            bslib::card_header("Training Set \u2014 Predicted vs Actual"),
+            bslib::card_body(
+              shinycssloaders::withSpinner(
+                plotOutput("train_plot", height = "400px"),
+                type = 8, color = "#15131e"
+              )
+            )
+          )
+        ),
+        feature_importance_cards
+      )
+    } else if (otype == "binary_classification") {
+      tagList(
+        bslib::layout_columns(
+          col_widths = c(6, 6),
+          bslib::card(
+            full_screen = TRUE,
+            class       = "card-light",
+            bslib::card_header("Confusion Matrix"),
+            bslib::card_body(
+              shinycssloaders::withSpinner(
+                plotOutput("confusion_matrix_plot", height = "400px"),
+                type = 8, caption = "Loading confusion matrix...", color = "#15131e"
+              )
+            )
+          ),
+          bslib::layout_columns(
+            col_widths = c(12, 12),
+            bslib::card(
+              full_screen = TRUE,
+              class       = "card-light",
+              bslib::card_header("Test Set"),
+              bslib::card_body(
+                shinycssloaders::withSpinner(
+                  plotOutput("test_plot", height = "185px"),
+                  type = 8, color = "#15131e"
+                )
+              )
+            ),
+            bslib::card(
+              full_screen = TRUE,
+              class       = "card-light",
+              bslib::card_header("Training Set"),
+              bslib::card_body(
+                shinycssloaders::withSpinner(
+                  plotOutput("train_plot", height = "185px"),
+                  type = 8, color = "#15131e"
+                )
+              )
+            )
+          )
+        ),
+        feature_importance_cards
+      )
+    } else {
+      # multiclass_classification — ROC/PR not applicable
+      tagList(
+        bslib::card(
+          full_screen = TRUE,
+          class       = "card-light",
+          bslib::card_header("Confusion Matrix"),
+          bslib::card_body(
+            shinycssloaders::withSpinner(
+              plotOutput("confusion_matrix_plot", height = "500px"),
+              type = 8, caption = "Loading confusion matrix...", color = "#15131e"
+            )
+          )
+        ),
+        feature_importance_cards
+      )
+    }
   })
 
-  # Confusion matrix plot
+  # Plot renderers
   output$confusion_matrix_plot <- renderPlot({
-    req(predict_classification_list())
-    plot_confusion_matrix(predict_classification_list())
+    msg <- model_waiting_plot()
+    if (!is.null(msg)) return(msg)
+    conduitR::plot_confusion_matrix(model_result())
   })
-
-  # Creating test plot
 
   output$test_plot <- renderPlot({
-    req(predict_classification_list(), input$model_plot_type)
-    if (input$model_plot_type == "ROC") {
-      plot_roc(
-        predict_classification_list(),
-        "test"
-      )
+    msg <- model_waiting_plot()
+    if (!is.null(msg)) return(msg)
+    result <- model_result()
+    if (outcome_type() == "regression") {
+      conduitR::plot_predicted_vs_actual(result, "test")
     } else {
-      plot_precision_recall(
-        predict_classification_list(),
-        "test"
-      )
+      req(input$model_plot_type)
+      if (input$model_plot_type == "ROC") conduitR::plot_roc(result, "test")
+      else conduitR::plot_precision_recall(result, "test")
     }
   })
 
-  # Creating Training Plot
   output$train_plot <- renderPlot({
-    req(predict_classification_list(), input$model_plot_type)
-    if (input$model_plot_type == "ROC") {
-      plot_roc(
-        predict_classification_list(),
-        "training"
-      )
+    msg <- model_waiting_plot()
+    if (!is.null(msg)) return(msg)
+    result <- model_result()
+    if (outcome_type() == "regression") {
+      conduitR::plot_predicted_vs_actual(result, "training")
     } else {
-      plot_precision_recall(
-        predict_classification_list(),
-        "training"
-      )
+      req(input$model_plot_type)
+      if (input$model_plot_type == "ROC") conduitR::plot_roc(result, "training")
+      else conduitR::plot_precision_recall(result, "training")
     }
   })
 
-  # Feature importance
-
-  # Dynamically render the slider only when data is ready
-  output$features_to_show_slider <- renderUI({
-    req(predict_classification_list())
-    max_val <- max(
-      length(predict_classification_list()$importance$feature),
-      na.rm = TRUE
-    )
-
+  # Feature importance slider
+  output$features_to_show_slider_ui <- renderUI({
+    if (model_task$status() != "success") return(NULL)
+    max_val <- max(length(model_result()$importance$feature), na.rm = TRUE)
     sliderInput(
-      "features_to_show_slider_ui",
+      "features_to_show_slider",
       "Select rank of features to show",
-      min = 1,
-      max = max_val,
-      value = c(0, max_val)
+      min   = 1,
+      max   = max_val,
+      value = c(1, min(20, max_val))
     )
   })
 
-  # Plotting feature importance
   output$feature_importance_plot <- renderPlot({
-    req(
-      predict_classification_list(),
-      input$features_to_show_slider_ui
-    )
-    plot_feature_importance(
-      predict_classification_list(),
-      input$features_to_show_slider_ui[1],
-      input$features_to_show_slider_ui[2]
+    msg <- model_waiting_plot()
+    if (!is.null(msg)) return(msg)
+    req(input$features_to_show_slider)
+    conduitR::plot_feature_importance(
+      model_result(),
+      input$features_to_show_slider[1],
+      input$features_to_show_slider[2]
     )
   })
 
@@ -506,17 +629,7 @@ server <- function(input, output, session) {
         "Statistics" = analysis_outputs$limma_volcano_plot(),
         "Enrichment" = enrichment_plot(),
         "Pathway" = pathway_plot(),
-        "Classification Prediction" = {
-          req(input$class_sub_tabs)
-          switch(
-            input$class_sub_tabs,
-            "Confusion Matrix" = confusion_matrix_plot_reactive(),
-            "Test Plot" = test_plot_reactive(),
-            "Train Plot" = train_plot_reactive(),
-            "Feature Importance" = feature_importance_plot_reactive(),
-            NULL
-          )
-        },
+        "Classification Prediction" = NULL,
         NULL
       )
     } else {
