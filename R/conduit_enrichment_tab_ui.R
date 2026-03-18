@@ -29,16 +29,6 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
         choices = c("gsea", "ora")
       ),
       uiOutput(ns("enrichment_direction_ui")),
-      conditionalPanel(
-        condition = sprintf("input['%s'] === 'ora'", ns("enrichment_type")),
-        hr(),
-        tags$strong("ORA Thresholds"),
-        numericInput(ns("limma_fc_threshold"), "LogFC threshold", value = 1, min = 0),
-        sliderInput(
-          ns("limma_p_threshold"), "Adjusted p-value threshold",
-          min = 0, max = 1, value = 0.05, step = 0.01
-        )
-      ),
       uiOutput(ns("enrichment_plot_options_ui")),
       hr(),
       actionButton(
