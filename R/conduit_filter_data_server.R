@@ -28,7 +28,7 @@ conduit_filter_data_server <- function(id, qf, colData, selected_assay) {
         )
       } else {
         vals <- sort(unique(as.character(col[!is.na(col)])))
-        if (length(vals) == 0 || length(vals) >= 50) return(NULL)
+        if (length(vals) == 0) return(NULL)
         shinyWidgets::pickerInput(
           ns_id, label = label,
           choices  = vals,
@@ -129,7 +129,7 @@ conduit_filter_data_server <- function(id, qf, colData, selected_assay) {
         col <- colData()[[var]]
         if (is.list(col)) return(FALSE)
         if (is.numeric(col)) { rng <- range(col, na.rm = TRUE); rng[1] != rng[2] }
-        else { n <- length(unique(col[!is.na(col)])); n > 0 && n < 50 }
+        else { n <- length(unique(col[!is.na(col)])); n > 0 }
       }, sample_vars())
     })
 
@@ -140,7 +140,7 @@ conduit_filter_data_server <- function(id, qf, colData, selected_assay) {
         col <- rd[[var]]
         if (is.list(col)) return(FALSE)
         if (is.numeric(col)) { rng <- range(col, na.rm = TRUE); rng[1] != rng[2] }
-        else { n <- length(unique(col[!is.na(col)])); n > 0 && n < 50 }
+        else { n <- length(unique(col[!is.na(col)])); n > 0 }
       }, feature_vars())
     })
 

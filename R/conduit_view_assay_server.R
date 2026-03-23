@@ -10,7 +10,7 @@ conduit_view_assay_server <- function(id, final_qf, selected_assay, processed_as
       } else {
         choices[1]
       }
-      updateSelectInput(session, "assay_to_show", choices = choices, selected = sel)
+      shinyWidgets::updatePickerInput(session, "assay_to_show", choices = choices, selected = sel)
     })
 
     # Reactive: wide data frame — features as rows, samples as columns

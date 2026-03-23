@@ -33,8 +33,8 @@ conduit_database_server <- function(id, conduit_obj, qf, metrics, colData, rowDa
 
     # Taxonomic tree plot
     taxa_tree_plot <- reactive({
-      req(conduit_obj())
-      conduitR::plot_percent_detected_taxa_tree(conduit_obj())
+      req(conduit_obj(), input$taxa_tree_layout)
+      conduitR::plot_percent_detected_taxa_tree(conduit_obj(), layout = input$taxa_tree_layout)
     })
 
     output$taxa_tree_plot <- renderPlot({

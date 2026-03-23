@@ -6,7 +6,7 @@ create_conduit_theme <- function() {
     fg       = "#1a1a2e",
     primary  = "#15131e",
     warning  = "#f3b24b",
-    "navbar-bg"            = "#15131e",
+    "navbar-bg"            = "#000000",
     "navbar-color"         = "#ffffff",
     "navbar-brand-color"   = "#ffffff",
     "sidebar-bg"           = "#15131e",
@@ -275,11 +275,37 @@ create_conduit_theme <- function() {
 
     /* ── About page hero ─────────────────────────────────── */
     .conduit-hero {
-      background: linear-gradient(135deg, #15131e 0%, #1e1c2e 55%, #252340 100%);
+      background: #000000;
       border-radius: 1rem;
       color: #fff;
       padding: 3.5rem 2rem;
       margin-bottom: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .conduit-hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .conduit-hero-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 80px 80px;
+      -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 85%);
+      mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 85%);
+    }
+    .conduit-hero-content {
+      position: relative;
+      z-index: 2;
     }
     .conduit-hero-title {
       color: #f3b24b;
@@ -341,12 +367,14 @@ create_conduit_theme <- function() {
 
     /* ── Help page ───────────────────────────────────────── */
     .conduit-help-hero {
-      background: linear-gradient(135deg, #15131e 0%, #1e1c2e 60%, #252340 100%);
+      background: #000000;
       border-radius: 0.75rem;
       color: #fff;
       padding: 2.25rem 2rem;
       margin-bottom: 1.5rem;
       text-align: center;
+      position: relative;
+      overflow: hidden;
     }
     .conduit-help-hero h2 {
       color: #f3b24b;

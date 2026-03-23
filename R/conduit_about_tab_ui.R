@@ -23,35 +23,41 @@ conduit_about_tab_ui <- function() {
   }
 
   tagList(
+    tags$script(src = "hero-canvas.js"),
     # ── Hero banner ──────────────────────────────────────────────────────────
     div(
       class = "conduit-hero text-center",
-      tags$img(
-        src   = "conduit-summit.png",
-        style = "max-width: 240px; margin-bottom: 1.75rem;"
-      ),
-      h1("Conduit-Summit", class = "conduit-hero-title"),
-      p(
-        "A full-featured visual interface for metaproteomics data analysis.",
-        class = "conduit-hero-subtitle"
-      ),
+      tags$canvas(class = "conduit-hero-canvas"),
+      div(class = "conduit-hero-grid"),
       div(
-        class = "conduit-hero-upload mt-3",
-        p(
-          "Upload the ",
-          tags$code(".rds", style = "color: #f3b24b; background: rgba(243,178,75,0.15); border: none;"),
-          " file produced by ",
-          actionLink("goto_help_from_upload", "conduit-ascent",
-                     style = "color: #f3b24b; text-decoration: underline;"),
-          ".",
-          class = "small mb-2"
+        class = "conduit-hero-content",
+        tags$img(
+          src   = "conduit-summit.png",
+          style = "max-width: 240px; margin-bottom: 1.75rem;"
         ),
-        fileInput(
-          "conduit_rds", NULL, accept = ".rds",
-          buttonLabel = tagList(icon("folder-open"), " Browse"),
-          placeholder = "No file selected"
+        h1("Conduit-Summit", class = "conduit-hero-title"),
+        p(
+          "A full-featured visual interface for metaproteomics data analysis.",
+          class = "conduit-hero-subtitle"
+        ),
+        div(
+          class = "conduit-hero-upload mt-3",
+          p(
+            "Upload the ",
+            tags$code(".rds", style = "color: #f3b24b; background: rgba(243,178,75,0.15); border: none;"),
+            " file produced by ",
+            actionLink("goto_help_from_upload", "conduit-ascent",
+                       style = "color: #f3b24b; text-decoration: underline;"),
+            ".",
+            class = "small mb-2"
+          ),
+          fileInput(
+            "conduit_rds", NULL, accept = ".rds",
+            buttonLabel = tagList(icon("folder-open"), " Browse"),
+            placeholder = "No file selected"
+          )
         )
-      ),
+      )
     ),
 
     # ── Workflow steps ───────────────────────────────────────────────────────
