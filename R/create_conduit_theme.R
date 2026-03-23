@@ -14,7 +14,7 @@ create_conduit_theme <- function() {
     "sidebar-border-color" = "#2a2840",
     "card-bg"              = "#ffffff",
     "card-border-color"    = "rgba(21, 19, 30, 0.1)",
-    "card-cap-bg"          = "#15131e",
+    "card-cap-bg"          = "#000000",
     "card-cap-color"       = "#ffffff",
     "card-border-radius"   = "0.6rem"
   ) |>
@@ -49,7 +49,7 @@ create_conduit_theme <- function() {
                   0 6px 16px rgba(21, 19, 30, 0.06);
     }
     .card > .card-header {
-      background-color: #15131e !important;
+      background-color: #000000 !important;
       color: #ffffff !important;
       font-weight: 600;
       font-size: 0.82rem;
@@ -97,7 +97,7 @@ create_conduit_theme <- function() {
     /* Target both class orderings bslib may render */
     .card > .card-header.bslib-navs-top,
     .bslib-card > .bslib-navs-top {
-      background-color: #15131e !important;
+      background-color: #000000 !important;
       border-bottom: 3px solid #f3b24b !important;
       padding: 0.3rem 0.75rem 0 !important;
       text-transform: none;
