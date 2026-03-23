@@ -14,7 +14,7 @@ options(shiny.maxRequestSize = 500 * 1024^2)
 ui <- bslib::page_navbar(
   id              = "main_tabs",
   title           = NULL,
-  bg              = "#15131e",
+  bg              = "#000000",
   inverse         = TRUE,
   collapsible     = TRUE,
   underline       = FALSE,

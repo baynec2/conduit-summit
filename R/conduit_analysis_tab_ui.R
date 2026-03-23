@@ -296,39 +296,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
     # ── Classification Prediction ─────────────────────────────────────────────
     bslib::nav_panel(
       "Classification Prediction",
-      bslib::layout_sidebar(
-        sidebar = bslib::sidebar(
-          title  = "Model Settings",
-          width  = 280,
-          bg     = "#f8f9fb",
-          fg     = "#1a1a2e",
-          open   = "open",
-          selectInput("outcome_var", "Outcome variable", choices = NULL),
-          sliderInput("split_ratio", "Train/Test split % (train)", min = 50, max = 90, value = 70),
-          selectInput(
-            "model_type", "Model type",
-            choices = c("lasso_regression", "random_forest", "xgboost")
-          ),
-          checkboxInput("show_advanced", "Show advanced options", value = FALSE),
-          conditionalPanel(
-            condition = "input.show_advanced == true",
-            hr(),
-            numericInput("cv_folds", "CV folds:", value = 5, min = 2, max = 20),
-            numericInput("random_seed", "Random seed:", value = 123)
-          ),
-          selectInput(
-            "model_plot_type", "Plot type",
-            choices = c("ROC", "precision_recall")
-          ),
-          hr(),
-          uiOutput("model_status_banner"),
-          actionButton(
-            "run_classification_model", "Run Model",
-            icon = icon("cogs"), class = "btn-primary w-100"
-          )
-        ),
-        uiOutput("prediction_main_content")
-      )
+      conduit_prediction_tab_ui("prediction")
     )
   )
 }
