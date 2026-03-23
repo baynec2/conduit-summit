@@ -7,11 +7,12 @@ conduit_view_assay_tab_ui <- function(id = "view_assay") {
       bg    = "#f8f9fb",
       fg    = "#1a1a2e",
       open  = "open",
-      selectInput(
+      shinyWidgets::pickerInput(
         ns("assay_to_show"),
         "Assay to display",
         choices  = NULL,
-        selected = NULL
+        selected = NULL,
+        options  = shinyWidgets::pickerOptions(liveSearch = TRUE, size = 8, container = "body")
       ),
       checkboxInput(
         ns("include_row_data"),

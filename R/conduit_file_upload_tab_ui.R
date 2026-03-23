@@ -1,6 +1,30 @@
 conduit_database_tab_ui <- function(id = "database") {
   ns <- NS(id)
-  tagList(
+  bslib::layout_sidebar(
+    sidebar = bslib::sidebar(
+      title  = "Controls",
+      width  = 260,
+      bg     = "#f8f9fb",
+      fg     = "#1a1a2e",
+      selectInput(
+        ns("taxa_tree_layout"),
+        "Tree Layout",
+        choices = c(
+          "Reingold-Tilford" = "reingold-tilford",
+          "Davidson-Harel"   = "davidson-harel",
+          "Fruchterman-Reingold" = "fruchterman-reingold",
+          "Kamada-Kawai"     = "kamada-kawai",
+          "GEM"              = "gem",
+          "Graphopt"         = "graphopt",
+          "MDS"              = "mds",
+          "Large Graph"      = "large-graph",
+          "DRL"              = "drl",
+          "Automatic"        = "automatic"
+        ),
+        selected = "reingold-tilford"
+      )
+    ),
+    tagList(
     # ── Dataset stats ────────────────────────────────────────────────────────
     bslib::layout_columns(
       col_widths = c(4, 4, 4),
@@ -30,7 +54,7 @@ conduit_database_tab_ui <- function(id = "database") {
       bslib::card_header("Taxonomic Tree by Coverage"),
       bslib::card_body(
         shinycssloaders::withSpinner(
-          plotOutput(ns("taxa_tree_plot"), width = "100%", height = "900px"),
+          plotOutput(ns("taxa_tree_plot"), width = "100%", height = "600px"),
           type = 8, caption = "Please wait, the taxonomic tree is loading...",
           color = "#15131e"
         )
@@ -48,5 +72,6 @@ conduit_database_tab_ui <- function(id = "database") {
         downloadButton(ns("download_protein_taxonomy"), "Download Table")
       )
     )
-  )
+  ) # end tagList
+  ) # end layout_sidebar
 }
