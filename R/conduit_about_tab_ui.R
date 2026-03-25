@@ -5,11 +5,14 @@ conduit_about_tab_ui <- function() {
       id    = id,
       class = "workflow-step",
       bslib::card(
-        class = "text-center h-100",
+        class = "text-center h-100 workflow-step-card",
         bslib::card_body(
           class = "d-flex flex-column align-items-center gap-2 py-3",
-          div(class = "workflow-step-number", number),
-          div(icon(icon_name), class = "conduit-feature-icon mb-0"),
+          div(class = "workflow-step-number mb-2", paste0("Step ", number)),
+          div(
+            class = "workflow-icon-circle",
+            icon(icon_name)
+          ),
           h6(title, class = "mb-1 mt-1"),
           p(desc, class = "text-muted small flex-grow-1 mb-2"),
           actionButton(
@@ -24,6 +27,7 @@ conduit_about_tab_ui <- function() {
 
   tagList(
     tags$script(src = "hero-canvas.js"),
+
     # ── Hero banner ──────────────────────────────────────────────────────────
     div(
       class = "conduit-hero text-center",
@@ -32,7 +36,7 @@ conduit_about_tab_ui <- function() {
       div(
         class = "conduit-hero-content",
         tags$img(
-          src   = "conduit-summit.png",
+          src   = "conduit-summit.svg",
           style = "max-width: 240px; margin-bottom: 1.75rem;"
         ),
         h1("Conduit-Summit", class = "conduit-hero-title"),
@@ -55,6 +59,36 @@ conduit_about_tab_ui <- function() {
             "conduit_rds", NULL, accept = ".rds",
             buttonLabel = tagList(icon("folder-open"), " Browse"),
             placeholder = "No file selected"
+          )
+        )
+      )
+    ),
+
+    # ── AI card ───────────────────────────────────────────────────────────────
+    div(
+      class = "mb-4",
+      bslib::card(
+        bslib::card_body(
+          class = "d-flex align-items-center gap-4 py-4 px-4",
+          div(
+            class = "flex-shrink-0 text-center",
+            style = "width: 64px;",
+            icon("robot", style = "font-size: 2.5rem; color: #f3b24b;")
+          ),
+          div(
+            class = "flex-grow-1",
+            h5("AI-Powered Analysis", class = "mb-1 fw-semibold"),
+            p(
+              "Ask questions about your data, generate plots, run differential expression, ",
+              "and explore enrichment results — all in plain language.",
+              class = "mb-3 small text-muted"
+            ),
+            actionButton(
+              "goto_ai_from_about",
+              tagList(icon("robot"), " Open AI Assistant"),
+              class = "btn-sm",
+              style = "background: #f3b24b; border-color: #f3b24b; color: #1a1a2e; font-weight: 600;"
+            )
           )
         )
       )
