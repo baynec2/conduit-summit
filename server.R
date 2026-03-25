@@ -26,21 +26,24 @@ server <- function(input, output, session) {
   observeEvent(input$step_goto_view_assay,  { bslib::nav_select("main_tabs", "view_assay") })
   observeEvent(input$step_goto_analysis,    { bslib::nav_select("main_tabs", "analysis") })
   observeEvent(input$step_goto_traverse,    { bslib::nav_select("main_tabs", "traverse") })
+  observeEvent(input$goto_ai_from_about,    { bslib::nav_select("main_tabs", "ai") })
 
   # Workflow step locking — steps 2-8 locked until file is uploaded
   locked_steps <- c("step_2", "step_3", "step_4", "step_5", "step_6", "step_7", "step_8")
   observe({
     lapply(locked_steps, function(id) shinyjs::addClass(id, "workflow-locked"))
+    shinyjs::disable("goto_ai_from_about")
   })
   observe({
     req(input$conduit_rds)
     lapply(locked_steps, function(id) shinyjs::removeClass(id, "workflow-locked"))
+    shinyjs::enable("goto_ai_from_about")
   })
 
   ##############################################################################
   # Tab visibility — hide data-dependent tabs until file is uploaded
   ##############################################################################
-  data_tabs <- c("database", "diann_qc", "view_metadata", "filter_data", "view_assay", "analysis", "traverse")
+  data_tabs <- c("database", "diann_qc", "view_metadata", "filter_data", "view_assay", "analysis", "traverse", "ai")
 
   observe({
     lapply(data_tabs, function(tab) bslib::nav_hide("main_tabs", tab))
@@ -256,11 +259,9 @@ server <- function(input, output, session) {
   ##############################################################################
   processed_assay <- reactive({
     req(final_qf(), selected_assay())
-    if (input$normalization_method == "none") {
-      paste0(selected_assay(), "_log", input$log_base, "_imputed")
-    } else {
-      paste0(selected_assay(), "_log", input$log_base, "_imputed_norm")
-    }
+    paste0(selected_assay(), "_log", input$log_base,
+           "_", input$imputation_method,
+           "_", input$normalization_method)
   })
 
   final_colData_names <- reactive({
@@ -304,6 +305,18 @@ server <- function(input, output, session) {
     conduit_obj = conduit_obj,
     qf = qf,
     colData = colData
+  )
+
+  ##############################################################################
+  # AI Chat
+  ##############################################################################
+  conduit_ai_server(
+    "ai",
+    conduit_obj         = conduit_obj,
+    final_qf            = final_qf,
+    processed_assay     = processed_assay,
+    final_colData_names = final_colData_names,
+    final_rowData_names = final_rowData_names
   )
 
   ##############################################################################

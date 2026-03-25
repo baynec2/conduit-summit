@@ -72,6 +72,97 @@ conduit_help_tab_ui <- function() {
       )
     ),
 
+    # ── AI Assistant ──────────────────────────────────────────────────────────
+    bslib::card(
+      class = "card-light mb-3",
+      bslib::card_header(tagList(icon("robot"), " AI Assistant")),
+      bslib::card_body(
+        p(
+          "The AI tab lets you explore your data, generate plots, run differential expression,",
+          " and interpret results using plain-language questions.",
+          " It connects to the AI provider of your choice using your own API key —",
+          " your key is used only within your browser session and is never stored."
+        ),
+        tags$hr(class = "my-3"),
+        h6("Getting an API Key", class = "fw-bold mb-3"),
+        bslib::layout_columns(
+          col_widths = c(6, 6),
+          # Anthropic
+          div(
+            class = "conduit-quickstart-step",
+            div(
+              tags$strong(icon("comment-dots"), " Anthropic (Claude)"),
+              tags$p(
+                class = "mb-2 text-muted small",
+                "Sign in at ", tags$strong("console.anthropic.com"),
+                ", go to ", tags$em("API Keys"), ", and create a new key.",
+                " Claude models are recommended for best results with this app."
+              ),
+              tags$a(
+                href = "https://console.anthropic.com/settings/keys", target = "_blank",
+                tagList(icon("arrow-up-right-from-square"), " Anthropic Console"),
+                class = "btn btn-outline-primary btn-sm"
+              )
+            )
+          ),
+          # OpenAI
+          div(
+            class = "conduit-quickstart-step",
+            div(
+              tags$strong(icon("robot"), " OpenAI (GPT)"),
+              tags$p(
+                class = "mb-2 text-muted small",
+                "Sign in at ", tags$strong("platform.openai.com"),
+                ", open the ", tags$em("API Keys"), " section under your profile,",
+                " and generate a new secret key."
+              ),
+              tags$a(
+                href = "https://platform.openai.com/api-keys", target = "_blank",
+                tagList(icon("arrow-up-right-from-square"), " OpenAI Platform"),
+                class = "btn btn-outline-primary btn-sm"
+              )
+            )
+          ),
+          # Google Gemini
+          div(
+            class = "conduit-quickstart-step",
+            div(
+              tags$strong(icon("gem"), " Google Gemini"),
+              tags$p(
+                class = "mb-2 text-muted small",
+                "Visit ", tags$strong("aistudio.google.com"),
+                " and click ", tags$em("Get API Key"), " in the left sidebar.",
+                " A free tier is available."
+              ),
+              tags$a(
+                href = "https://aistudio.google.com/app/apikey", target = "_blank",
+                tagList(icon("arrow-up-right-from-square"), " Google AI Studio"),
+                class = "btn btn-outline-primary btn-sm"
+              )
+            )
+          ),
+          # Ollama
+          div(
+            class = "conduit-quickstart-step",
+            div(
+              tags$strong(icon("server"), " Ollama (Local)"),
+              tags$p(
+                class = "mb-2 text-muted small",
+                "No API key required. Install Ollama locally from ",
+                tags$strong("ollama.com"), ", pull a model (e.g. ",
+                tags$code("ollama pull llama3.2"), "), and make sure the server is running."
+              ),
+              tags$a(
+                href = "https://ollama.com", target = "_blank",
+                tagList(icon("arrow-up-right-from-square"), " Ollama"),
+                class = "btn btn-outline-primary btn-sm"
+              )
+            )
+          )
+        )
+      )
+    ),
+
     # ── The Conduit Ecosystem ─────────────────────────────────────────────────
     h6("The Conduit Ecosystem", class = "text-muted text-uppercase fw-bold mb-2 mt-1",
        style = "letter-spacing: 0.06em; font-size: 0.75rem;"),
@@ -137,6 +228,20 @@ conduit_help_tab_ui <- function() {
           href = "https://github.com/baynec2/conduit-ascent", target = "_blank",
           tagList(icon("arrow-up-right-from-square"), " View setup instructions on GitHub"),
           class = "btn btn-outline-primary btn-sm mt-2"
+        )
+      ),
+      bslib::accordion_panel(
+        title = "Is my data sent to an AI company?",
+        icon  = icon("shield-halved"),
+        p(
+          "Only if you choose a cloud provider (Anthropic, OpenAI, or Google Gemini).",
+          " In that case, your messages and a summary of your dataset structure are sent to that provider's API",
+          " — the same way any API call works. Your API key is held only in your browser session",
+          " and is never stored by Conduit-Summit."
+        ),
+        p(class = "mb-0",
+          "If you prefer to keep your data entirely local, use the ",
+          tags$strong("Ollama"), " option, which runs a model on your own machine with no external calls."
         )
       ),
       bslib::accordion_panel(

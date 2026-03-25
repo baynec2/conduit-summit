@@ -221,11 +221,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
               uiOutput(ns("selected_feature_plot_facet_formula_ui")),
               uiOutput(ns("selected_feature_plot_color_ui")),
               uiOutput(ns("selected_feature_plot_shape_ui")),
-              selectInput(
-                ns("selected_feature_plot_data_type_ui"), "Data type",
-                choices  = c("", "_log2", "_log2_imputed", "_log2_imputed_norm"),
-                selected = "_log2_imputed"
-              ),
+              uiOutput(ns("selected_feature_plot_data_type_ui")),
             )
           )
         ),
