@@ -25,7 +25,8 @@ WORKDIR /srv/shiny-server/conduit-summit
 COPY renv.lock renv.lock
 COPY renv/activate.R renv/activate.R
 COPY renv/settings.json renv/settings.json
-RUN R -e "renv::restore()"
+RUN --mount=type=secret,id=GITHUB_PAT \
+    GITHUB_PAT=$(cat /run/secrets/GITHUB_PAT) R -e "renv::restore()"
 
 # Copy app files
 COPY ui.R server.R ./
