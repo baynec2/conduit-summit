@@ -364,6 +364,47 @@ create_conduit_theme <- function() {
       opacity: 0.35;
       pointer-events: none;
     }
+    .workflow-step-card {
+      border-top: 3px solid #f3b24b !important;
+      border-left: none !important;
+      border-right: none !important;
+      border-bottom: none !important;
+      transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+    }
+    .workflow-step-card:hover {
+      box-shadow: 0 6px 24px rgba(21, 19, 30, 0.12), 0 2px 8px rgba(21, 19, 30, 0.08) !important;
+      transform: translateY(-3px);
+    }
+    .workflow-step-card .workflow-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(243, 178, 75, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #f3b24b;
+      margin: 0 auto 0.5rem;
+      transition: background 0.18s ease;
+    }
+    .workflow-step-card:hover .workflow-icon-circle {
+      background: rgba(243, 178, 75, 0.22);
+    }
+    .workflow-step-card .workflow-step-number {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f3b24b;
+      line-height: 1;
+    }
+    .workflow-step-card h6 {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #1a1a2e;
+      margin-bottom: 0.4rem !important;
+    }
 
     /* ── Help page ───────────────────────────────────────── */
     .conduit-help-hero {
