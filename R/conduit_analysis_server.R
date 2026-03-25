@@ -44,7 +44,7 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     # all NAs filled in, which causes sechm to throw "two distinct break values".
     log_assay <- reactive({
       req(processed_assay())
-      sub("_imputed.*$", "", processed_assay())
+      sub("(_log[0-9]+).*$", "\\1", processed_assay())
     })
 
     missing_value_plot <- reactive({
@@ -117,11 +117,13 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
 
     density_plot <- reactive({
       req(final_qf(), selected_assay(), log_base(), input$density_plot_color_choice)
+      log_nm     <- paste0(selected_assay(), "_log", log_base())
+      imputed_nm <- paste0(log_nm, "_", input$imputation_method)
       conduitR::plot_density(
         final_qf(),
-        assay_name = selected_assay(),
-        log_base(),
-        input$density_plot_color_choice
+        log_assay     = log_nm,
+        imputed_assay = imputed_nm,
+        color         = input$density_plot_color_choice
       )
     })
 
@@ -689,6 +691,22 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
       req(final_colData_and_rowData_names())
       selectInput(session$ns("selected_feature_plot_shape"), "Choose shape",
         choices = c("none" = "none", final_colData_and_rowData_names()), multiple = FALSE, selected = "none")
+    })
+
+    output$selected_feature_plot_data_type_ui <- renderUI({
+      req(final_qf(), selected_assay())
+      # Derive available assay variants by scanning names(qf) for those starting
+      # with the selected base assay name (e.g. protein_groups_log2_MinDet_none)
+      base     <- selected_assay()
+      all_names <- names(final_qf())
+      derived  <- grep(paste0("^", base, "_log[0-9]+"), all_names, value = TRUE)
+      choices  <- c(base, derived)
+      selected <- if (processed_assay() %in% choices) processed_assay() else base
+      selectInput(
+        session$ns("selected_feature_plot_data_type"), "Data type",
+        choices  = choices,
+        selected = selected
+      )
     })
 
     selected_features <- reactive({
