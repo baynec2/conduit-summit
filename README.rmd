@@ -14,57 +14,76 @@ knitr::opts_chunk$set(
 
 # Conduit-Summit
 
-A modern graphical user interface application built with R Shiny, providing an intuitive and user-friendly experience for managing and interacting with metaproteomic data processed by [Conduit-Ascent](https://github.com/baynec2/conduit-ascent).
+[![Build and Push Docker Image](https://github.com/baynec2/conduit-summit/actions/workflows/docker.yml/badge.svg)](https://github.com/baynec2/conduit-summit/actions/workflows/docker.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/baynec2/conduit-summit)](https://hub.docker.com/r/baynec2/conduit-summit)
 
-## Features
+A point-and-click interface for exploring and analyzing metaproteomic data — no coding required. Upload the `.rds` file produced by [Conduit-Ascent](https://github.com/baynec2/conduit-ascent) and work through an eight-step analysis workflow entirely in your browser.
 
-- Modern and intuitive user interface
-- Interactive data visualization
-- Real-time data processing
-- Easy-to-use controls and navigation
-- Responsive design
+## The Conduit Ecosystem
 
-## Prerequisites
+Conduit-Summit is one part of a three-tool metaproteomics platform:
 
-Before you begin, ensure you have the following installed:
-- R (version 4.0.0 or higher)
-- RStudio (recommended for development)
+| Tool | Role |
+|---|---|
+| [Conduit-Ascent](https://github.com/baynec2/conduit-ascent) | Snakemake command-line workflow. Processes raw mass-spec data, identifies peptides, resolves taxonomy, and produces a structured `.rds` output. |
+| **Conduit-Summit** (this repo) | Visual interface for exploring Conduit-Ascent results. All analysis is point-and-click. |
+| [ConduitR](https://github.com/baynec2/conduitR) | The R package powering both tools. Available for advanced users who want to build on the framework. |
 
-Better instructions will be added soon
+## Quick Start
 
-## Installation
+The easiest way to run Conduit-Summit is with Docker — no R installation needed:
 
-1. Clone the repository:
-
-```bash, eval = FALSE
-git clone https://github.com/baynec2/conduit-GUI.git
-cd conduit-GUI
+```bash
+docker pull baynec2/conduit-summit
+docker run -p 3838:3838 baynec2/conduit-summit
 ```
 
-2. Install required R packages: (To be updated this is a placeholder)
+Then open <http://localhost:3838/conduit-summit/> in your browser and upload your `.rds` file.
 
-```r, eval = FALSE
-install.packages(c("shiny", "shinydashboard", "tidyverse", "plotly"))
+## Analysis Workflow
+
+Once a file is uploaded, eight analysis tabs unlock in sequence:
+
+| Step | Tab | What you can do |
+|---|---|---|
+| 1 | **File Upload** | Upload your Conduit-Ascent `.rds` file and preview taxonomic coverage |
+| 2 | **Database** | Explore detected species, protein groups, and per-sample summaries |
+| 3 | **DIA-NN QC** | Review database search quality metrics |
+| 4 | **View Metadata** | Inspect sample annotations and experimental design |
+| 5 | **Filter Data** | Subset samples and features; choose log transform, imputation, and normalization |
+| 6 | **View Assay** | Inspect the processed quantitative matrix |
+| 7 | **Analysis** | QC plots, PCA, heatmaps, differential expression (LIMMA), GO/KEGG enrichment, pathway maps, and outcome prediction |
+| 8 | **Traverse** | Follow a feature across assay levels (precursor → peptide → protein → taxon) |
+
+## AI Assistant
+
+The AI tab lets you explore your data and run analyses using plain-language questions — ask for a volcano plot, request differential expression between two groups, or get an interpretation of enrichment results. No code required.
+
+Supported providers: **Anthropic (Claude)**, **OpenAI (GPT)**, **Google Gemini**, and **Ollama** (fully local, no API key needed). Your API key is used only within your session and is never stored.
+
+To pre-load an API key via Docker:
+
+```bash
+docker run -p 3838:3838 \
+  -e ANTHROPIC_API_KEY=your_key_here \
+  baynec2/conduit-summit
 ```
 
-## Running the Application
+## Running Locally
 
-To run the Shiny app locally:
+**Prerequisites:** R >= 4.4
 
-1. Open the project in RStudio
-2. Open the `app.R` file
-3. Click 'Run App' in RStudio, or run:
+```bash
+git clone https://github.com/baynec2/conduit-summit.git
+cd conduit-summit
+```
 
-```r, eval = FALSE
+```r
+install.packages("renv")
+renv::restore()
 shiny::runApp()
 ```
 
-## Development
+## Contributing
 
-The application structure follows R Shiny best practices:
-- `app.R`: Main application file
-- `R/`: Global variables and functions
-- `ui.R`: User interface components
-- `server.R`: Server-side logic
-- `www/`: Static assets (CSS, JavaScript, images)
-
+Bug reports and feature requests are welcome — please [open an issue](https://github.com/baynec2/conduit-summit/issues) and include your R session info where relevant.

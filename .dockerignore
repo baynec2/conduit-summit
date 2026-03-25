@@ -1,0 +1,11 @@
+.git
+.Rproj.user
+.Rhistory
+.RData
+.DS_Store
+.claude
+*.Rproj
+rsconnect/
+tests/
+Rplots.pdf
+renv/library/
