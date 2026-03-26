@@ -3,6 +3,8 @@ FROM rocker/shiny:4.4
 # System libraries needed by R packages
 RUN apt-get update && apt-get install -y \
     curl \
+    perl \
+    cmake \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
@@ -16,6 +18,10 @@ RUN apt-get update && apt-get install -y \
     libgit2-dev \
     libbz2-dev \
     liblzma-dev \
+    libglpk-dev \
+    libmagick++-dev \
+    libnode-dev \
+    chromium \
     && rm -rf /var/lib/apt/lists/*
 
 # Install renv
