@@ -1,4 +1,4 @@
-FROM rocker/shiny:4.4
+FROM rocker/shiny:4.5
 
 # System libraries needed by R packages
 RUN apt-get update && apt-get install -y \
