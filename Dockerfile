@@ -2,6 +2,7 @@ FROM rocker/shiny:4.4
 
 # System libraries needed by R packages
 RUN apt-get update && apt-get install -y \
+    curl \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
