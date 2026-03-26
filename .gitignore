@@ -9,3 +9,5 @@ rsconnect/*
 test/*.rds
 tests/testthat/_snaps/
 Rplots.pdf
+.posit/
+.vscode/
