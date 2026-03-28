@@ -7,6 +7,8 @@
 Image](https://github.com/baynec2/conduit-summit/actions/workflows/docker.yml/badge.svg)](https://github.com/baynec2/conduit-summit/actions/workflows/docker.yml)
 [![Docker
 Pulls](https://img.shields.io/docker/pulls/baynec2/conduit-summit)](https://hub.docker.com/r/baynec2/conduit-summit)
+[![Live
+Demo](https://img.shields.io/badge/live%20demo-shinyapps.io-blue)](https://gonzalezlab.shinyapps.io/conduit-summit/)
 
 A point-and-click interface for exploring and analyzing metaproteomic
 data — no coding required. Upload the `.rds` file produced by
