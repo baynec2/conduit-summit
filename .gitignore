@@ -11,3 +11,5 @@ tests/testthat/_snaps/
 Rplots.pdf
 .posit/
 .vscode/
+renv/cache/
+renv/projects
