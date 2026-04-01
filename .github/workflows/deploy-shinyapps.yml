@@ -25,6 +25,7 @@ jobs:
             libcurl4-openssl-dev \
             libcairo2-dev \
             libfontconfig1-dev \
+            libmagick++-dev \
             gsfonts \
             cmake
 
