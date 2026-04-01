@@ -203,6 +203,18 @@ conduit_ai_server <- function(id, conduit_obj, final_qf, processed_assay,
       shinychat::chat_clear("chat", session = session)
     })
 
+    # ── Enable/disable chat input based on connection state ───────────────────
+    chat_selector <- sprintf("#%s textarea, #%s button", ns("chat"), ns("chat"))
+    shinyjs::disable(selector = chat_selector)
+
+    observe({
+      if (!is.null(chat_obj())) {
+        shinyjs::enable(selector = chat_selector)
+      } else {
+        shinyjs::disable(selector = chat_selector)
+      }
+    })
+
     # ── Handle user messages (streaming) ─────────────────────────────────────
     observeEvent(input$chat_user_input, {
       req(chat_obj(), input$chat_user_input)
