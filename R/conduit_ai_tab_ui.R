@@ -14,14 +14,19 @@ conduit_ai_tab_ui <- function(id = "ai") {
       ),
       conditionalPanel(
         condition = sprintf("input['%s'] != 'Ollama (local)'", ns("provider")),
-        passwordInput(ns("api_key"), "API Key",
+        tags$div(
+          class = "d-flex align-items-center gap-1 mb-1",
+          tags$label("API Key", class = "form-label mb-0"),
+          bslib::popover(
+            trigger = tags$span(icon("circle-question"), style = "font-size:0.85em; color:#6c757d; cursor:pointer;"),
+            title = "API Key",
+            tags$p("Auto-filled from ", tags$code("ANTHROPIC_API_KEY"), ", ", tags$code("OPENAI_API_KEY"), ", or ", tags$code("GEMINI_API_KEY"), " environment variables if set."),
+            tags$p("Your key is held in memory for this session only — never written to disk or logged. For local use, set it in ", tags$code(".Renviron"), " (and add that file to ", tags$code(".gitignore"), ").")
+          )
+        ),
+        passwordInput(ns("api_key"), label = NULL,
           value = "",
-          placeholder = "sk-..."),
-        helpText(
-          "Auto-filled from ", tags$code("ANTHROPIC_API_KEY"), ",",
-          tags$code("OPENAI_API_KEY"), ", or ", tags$code("GEMINI_API_KEY"),
-          " environment variables if set."
-        )
+          placeholder = "sk-...")
       ),
       uiOutput(ns("model_select_ui")),
       hr(),
@@ -30,13 +35,6 @@ conduit_ai_tab_ui <- function(id = "ai") {
       uiOutput(ns("context_display")),
       actionButton(ns("clear_chat"), "Clear Chat", class = "btn-outline-secondary w-100 mt-2",
                    icon = icon("trash")),
-      hr(),
-      helpText(
-        "Your API key is held in memory for this session only — it is never written to disk, logged, or",
-        " included in any output. It is transmitted only to your chosen API provider to authenticate requests.",
-        " For local use, set it as an environment variable in ", tags$code(".Renviron"),
-        " and ensure that file is listed in ", tags$code(".gitignore"), "."
-      )
     ),
     shinychat::chat_ui(
       ns("chat"),
