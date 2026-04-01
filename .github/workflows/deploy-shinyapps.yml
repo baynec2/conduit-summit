@@ -17,6 +17,17 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libglpk-dev \
+            libcurl4-openssl-dev \
+            libcairo2-dev \
+            libfontconfig1-dev \
+            gsfonts \
+            cmake
+
       - name: Set up renv
         uses: r-lib/actions/setup-renv@v2
 
