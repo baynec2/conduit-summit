@@ -47,11 +47,23 @@ server <- function(input, output, session) {
 
   observe({
     lapply(data_tabs, function(tab) bslib::nav_hide("main_tabs", tab))
+    bslib::nav_hide("main_tabs", "provenance")
   })
 
   observe({
     req(input$conduit_rds)
     lapply(data_tabs, function(tab) bslib::nav_show("main_tabs", tab, select = FALSE))
+  })
+
+  # Show Provenance tab only when the uploaded object has a populated provenance slot
+  observe({
+    req(conduit_obj())
+    prov <- tryCatch(slot(conduit_obj(), "provenance"), error = function(e) NULL)
+    if (!is.null(prov)) {
+      bslib::nav_show("main_tabs", "provenance", select = FALSE)
+    } else {
+      bslib::nav_hide("main_tabs", "provenance")
+    }
   })
 
 
@@ -158,6 +170,10 @@ server <- function(input, output, session) {
     selected_assay(input$agg_level_choices)
   })
 
+  ################################################################################
+  # Provenance Tab
+  ################################################################################
+  conduit_provenance_server("provenance", conduit_obj = conduit_obj)
   ################################################################################
   # DIA-NN QC Tab
   ################################################################################
