@@ -274,11 +274,10 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
     })
 
     relative_abundance_plot <- reactive({
-      req(final_qf(), relative_abundance_assay())
-      if (relative_abundance_assay() %in% paste0(
-        c("domain", "kingdom", "phylum", "class", "order", "family", "genus", "species"),
-        "_rel_abundance"
-      )) {
+      req(final_qf(), relative_abundance_assay(), conduit_obj())
+      qf_in <- slot(conduit_obj(), "QFeatures")
+      spec  <- conduitR::aggregation_targets(qf_in)[[selected_assay()]]
+      if (!is.null(spec) && identical(spec$kind, "taxonomic")) {
         conduitR::plot_relative_abundance(
           final_qf(),
           assay_name = relative_abundance_assay(),

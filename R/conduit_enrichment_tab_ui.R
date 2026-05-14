@@ -19,11 +19,7 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
         "Results use the formula and contrast configured in the ",
         tags$strong("Statistics"), " tab."
       ),
-      selectInput(
-        ns("annotation_type"), "Term Type",
-        choices = c("go", "kegg", "domain", "kingdom", "phylum", "class",
-                    "order", "family", "genus", "species")
-      ),
+      uiOutput(ns("annotation_type_ui")),
       selectInput(
         ns("enrichment_type"), "Enrichment Method",
         choices = c("gsea", "ora")

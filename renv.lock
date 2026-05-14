@@ -3854,7 +3854,7 @@
       "RemoteUsername": "baynec2",
       "RemoteRepo": "conduitR",
       "RemoteRef": "develop",
-      "RemoteSha": "6c98b7cb3c5eb1a16e192582fbaf60a2399efa8c"
+      "RemoteSha": "920b45fedba2dcd271221298ebf647851a43ebb5"
     },
     "coro": {
       "Package": "coro",
