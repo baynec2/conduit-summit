@@ -35,7 +35,8 @@ conduit_header_ui <- function() {
           class = "btn-outline-light btn-sm"
         ),
         title = "Aggregation Level",
-        uiOutput("agg_level_choices_ui")
+        uiOutput("agg_level_choices_ui"),
+        uiOutput("include_unassigned_ui")
       ),
       bslib::popover(
         trigger = actionButton(

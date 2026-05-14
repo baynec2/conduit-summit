@@ -131,22 +131,33 @@ server <- function(input, output, session) {
   # Header
   ################################################################################
 
-  # Aggregation choices (assays)
+  # Aggregation choices: base assays + registered aggregation targets.
+  # Targets are resolved on demand via conduitR::aggregate_assay_by_annotation()
+  # in qf_with_selected() below — no pre-aggregated assays needed.
 
   selected_assay <- reactiveVal(NULL)
 
-  possible_assays <- reactive({
+  base_assays <- reactive({
     req(qf())
     names(qf())
+  })
+
+  agg_targets <- reactive({
+    req(qf())
+    conduitR::aggregation_targets(qf())
+  })
+
+  possible_assays <- reactive({
+    c(base_assays(), names(agg_targets()))
   })
 
   observeEvent(
     qf(),
     {
-      default_choice <- if ("protein_groups" %in% possible_assays()) {
+      default_choice <- if ("protein_groups" %in% base_assays()) {
         "protein_groups"
       } else {
-        possible_assays()[[1]]
+        base_assays()[[1]]
       }
       if (is.null(selected_assay())) {
         selected_assay(default_choice)
@@ -158,16 +169,62 @@ server <- function(input, output, session) {
   output$agg_level_choices_ui <- renderUI({
     req(conduit_obj(), qf())
 
-    selectInput(
+    targets <- agg_targets()
+    choices <- if (length(targets) == 0) {
+      base_assays()
+    } else {
+      taxonomic  <- names(targets)[vapply(targets, function(t) identical(t$kind, "taxonomic"),  logical(1))]
+      functional <- names(targets)[vapply(targets, function(t) identical(t$kind, "functional"), logical(1))]
+      other      <- setdiff(names(targets), c(taxonomic, functional))
+      groups <- list("Base assays" = base_assays())
+      if (length(taxonomic))  groups[["Taxonomic"]]  <- taxonomic
+      if (length(functional)) groups[["Functional"]] <- functional
+      if (length(other))      groups[["Other"]]      <- other
+      groups
+    }
+
+    shinyWidgets::pickerInput(
       "agg_level_choices",
-      "Choose QFeatures Assay",
-      choices = possible_assays(),
-      selected = selected_assay()
+      label    = "Choose Assay / Aggregation Target",
+      choices  = choices,
+      selected = selected_assay(),
+      options  = shinyWidgets::pickerOptions(liveSearch = TRUE, size = 12, container = "body")
     )
+  })
+
+  output$include_unassigned_ui <- renderUI({
+    req(selected_assay())
+    is_target <- selected_assay() %in% names(agg_targets())
+    checkboxInput(
+      "include_unassigned",
+      "Include unannotated features (sum as 'Unassigned')",
+      value = isTRUE(input$include_unassigned)
+    ) |>
+      tagAppendAttributes(
+        class = if (!is_target) "text-muted",
+        style = if (!is_target) "opacity: 0.5; pointer-events: none;" else NULL
+      )
   })
 
   observeEvent(input$agg_level_choices, {
     selected_assay(input$agg_level_choices)
+  })
+
+  # qf_with_selected: when the user picks an aggregation target, materialize
+  # it via aggregate_assay_by_annotation; when they pick a base assay, this
+  # is just qf().
+  qf_with_selected <- reactive({
+    req(qf(), selected_assay())
+    sa <- selected_assay()
+    if (sa %in% base_assays()) return(qf())
+    spec <- agg_targets()[[sa]]
+    if (is.null(spec)) return(qf())
+    conduitR::aggregate_assay_by_annotation(
+      qf(),
+      i          = spec$from,
+      fcol       = sa,
+      include_na = if (isTRUE(input$include_unassigned)) "group" else "drop"
+    )
   })
 
   ################################################################################
@@ -188,7 +245,7 @@ server <- function(input, output, session) {
   ##############################################################################
   filtered_qf <- conduit_filter_data_server(
     "filter_data",
-    qf = qf,
+    qf = qf_with_selected,
     colData = colData,
     selected_assay = selected_assay
   )
@@ -249,20 +306,11 @@ server <- function(input, output, session) {
       norm_method = input$normalization_method
     )
 
-    # Store relative abundance information for the taxonomic data
-    if (
-      selected_assay() %in%
-        c(
-          "domain",
-          "kingdom",
-          "phylum",
-          "class",
-          "order",
-          "family",
-          "genus",
-          "species"
-        )
-    ) {
+    # Store relative abundance information for taxonomic aggregation targets.
+    # Dispatched on the registry's `kind` so adding new taxonomic ontologies
+    # in conduitR doesn't require updates here.
+    spec <- agg_targets()[[selected_assay()]]
+    if (!is.null(spec) && identical(spec$kind, "taxonomic")) {
       new_qf <- conduitR::add_relative_abundance_assay(new_qf, selected_assay())
     }
 
