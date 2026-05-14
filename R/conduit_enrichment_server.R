@@ -3,6 +3,17 @@ conduit_enrichment_server <- function(id, conduit_obj, limma_stats_results,
                                        session_parent) {
   moduleServer(id, function(input, output, session) {
 
+    output$annotation_type_ui <- renderUI({
+      req(conduit_obj())
+      qf <- slot(conduit_obj(), "QFeatures")
+      tgts <- conduitR::aggregation_targets(qf)
+      choices <- if (length(tgts) == 0) character(0) else names(tgts)
+      selectInput(
+        session$ns("annotation_type"), "Term Type",
+        choices = choices
+      )
+    })
+
     output$enrichment_plot_options_ui <- renderUI({
       req(input$enrichment_type)
       if (input$enrichment_type == "gsea") {
