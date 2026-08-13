@@ -4,8 +4,8 @@ conduit_ai_tab_ui <- function(id = "ai") {
     sidebar = bslib::sidebar(
       title = "AI Settings",
       width = 280,
-      bg = "#f8f9fb",
-      fg = "#1a1a2e",
+      bg = "#faf6ee",
+      fg = "#3b352a",
       selectInput(
         ns("provider"),
         "Provider",
@@ -18,7 +18,7 @@ conduit_ai_tab_ui <- function(id = "ai") {
           class = "d-flex align-items-center gap-1 mb-1",
           tags$label("API Key", class = "form-label mb-0"),
           bslib::popover(
-            trigger = tags$span(icon("circle-question"), style = "font-size:0.85em; color:#6c757d; cursor:pointer;"),
+            trigger = tags$span(icon("circle-question"), style = "font-size:0.85em; color:#6f6552; cursor:pointer;"),
             title = "API Key",
             tags$p("Auto-filled from ", tags$code("ANTHROPIC_API_KEY"), ", ", tags$code("OPENAI_API_KEY"), ", or ", tags$code("GEMINI_API_KEY"), " environment variables if set."),
             tags$p("Your key is held in memory for this session only — never written to disk or logged. For local use, set it in ", tags$code(".Renviron"), " (and add that file to ", tags$code(".gitignore"), ").")

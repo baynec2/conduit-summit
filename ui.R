@@ -16,7 +16,7 @@ options(shiny.maxRequestSize = 500 * 1024^2)
 ui <- bslib::page_navbar(
   id              = "main_tabs",
   title           = NULL,
-  bg              = "#000000",
+  bg              = "#18150f",
   inverse         = TRUE,
   collapsible     = TRUE,
   underline       = FALSE,
@@ -31,7 +31,7 @@ ui <- bslib::page_navbar(
         font-size: 13px !important;
         display: inline !important;
         margin-top: 0 !important;
-        color: #f3b24b !important;
+        color: #d4915c !important;
       }
     ")),
     tags$script(HTML("
@@ -52,10 +52,10 @@ ui <- bslib::page_navbar(
     shinydisconnect::disconnectMessage(
       text           = "Your session has disconnected or an unexpected error occurred.",
       refresh        = "Refresh Page",
-      background     = "#000000",
-      colour         = "#ffffff",
-      refreshColour  = "#f3b24b",
-      overlayColour  = "#000000",
+      background     = "#18150f",
+      colour         = "#efe6d2",
+      refreshColour  = "#d4915c",
+      overlayColour  = "#18150f",
       overlayOpacity = 0.92,
       width          = 520,
       top            = "center",

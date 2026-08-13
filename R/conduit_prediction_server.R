@@ -120,7 +120,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
         bslib::card_body(
           shinycssloaders::withSpinner(
             plotOutput(session$ns("feature_importance_plot"), height = "500px"),
-            type = 8, color = "#15131e"
+            type = 8, color = "#2f2a20"
           )
         )
       )
@@ -136,7 +136,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
               bslib::card_body(
                 shinycssloaders::withSpinner(
                   plotOutput(session$ns("test_plot"), height = "400px"),
-                  type = 8, color = "#15131e"
+                  type = 8, color = "#2f2a20"
                 )
               )
             ),
@@ -147,7 +147,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
               bslib::card_body(
                 shinycssloaders::withSpinner(
                   plotOutput(session$ns("train_plot"), height = "400px"),
-                  type = 8, color = "#15131e"
+                  type = 8, color = "#2f2a20"
                 )
               )
             )
@@ -165,7 +165,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
               bslib::card_body(
                 shinycssloaders::withSpinner(
                   plotOutput(session$ns("confusion_matrix_plot"), height = "400px"),
-                  type = 8, caption = "Loading confusion matrix...", color = "#15131e"
+                  type = 8, caption = "Loading confusion matrix...", color = "#2f2a20"
                 )
               )
             ),
@@ -178,7 +178,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
                 bslib::card_body(
                   shinycssloaders::withSpinner(
                     plotOutput(session$ns("test_plot"), height = "185px"),
-                    type = 8, color = "#15131e"
+                    type = 8, color = "#2f2a20"
                   )
                 )
               ),
@@ -189,7 +189,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
                 bslib::card_body(
                   shinycssloaders::withSpinner(
                     plotOutput(session$ns("train_plot"), height = "185px"),
-                    type = 8, color = "#15131e"
+                    type = 8, color = "#2f2a20"
                   )
                 )
               )
@@ -207,7 +207,7 @@ conduit_prediction_server <- function(id, final_qf, processed_assay, final_colDa
             bslib::card_body(
               shinycssloaders::withSpinner(
                 plotOutput(session$ns("confusion_matrix_plot"), height = "500px"),
-                type = 8, caption = "Loading confusion matrix...", color = "#15131e"
+                type = 8, caption = "Loading confusion matrix...", color = "#2f2a20"
               )
             )
           ),

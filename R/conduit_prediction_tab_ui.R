@@ -5,8 +5,8 @@ conduit_prediction_tab_ui <- function(id) {
     sidebar = bslib::sidebar(
       title  = "Model Settings",
       width  = 280,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       open   = "open",
       selectInput(ns("outcome_var"), "Outcome variable", choices = NULL),
       sliderInput(ns("split_ratio"), "Train/Test split % (train)", min = 50, max = 90, value = 70),

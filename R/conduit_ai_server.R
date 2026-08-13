@@ -170,7 +170,7 @@ conduit_ai_server <- function(id, conduit_obj, final_qf, processed_assay,
           class    = "form-control",
           readonly = NA,
           rows     = "3",
-          style    = "font-size: 0.82em; resize: none; background: #f8f9fb;
+          style    = "font-size: 0.82em; resize: none; background: #faf6ee;
                       color: #555; border-color: rgba(21,19,30,0.12);",
           ctx
         ),

@@ -4,8 +4,8 @@ conduit_pathway_tab_ui <- function(id = "pathway") {
     sidebar = bslib::sidebar(
       title  = "Pathway Controls",
       width  = 280,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       open   = "open",
       actionButton(
         ns("pathway_return_to_stats_button"),
@@ -42,7 +42,7 @@ conduit_pathway_tab_ui <- function(id = "pathway") {
       plotly::plotlyOutput(ns("pathway_plot"), width = "100%", height = "88vh"),
       type    = 8,
       caption = "Loading pathway map...",
-      color   = "#15131e"
+      color   = "#2f2a20"
     )
   )
 }

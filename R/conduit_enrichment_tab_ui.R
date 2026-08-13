@@ -4,8 +4,8 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
     sidebar = bslib::sidebar(
       title  = "Enrichment Controls",
       width  = 280,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       open   = "open",
       actionButton(
         ns("enrichment_return_to_stats_button"),
@@ -43,7 +43,7 @@ conduit_enrichment_tab_ui <- function(id = "enrichment") {
           shinycssloaders::withSpinner(
             plotOutput(ns("enrichment_plot"), height = "600px"),
             type = 8, caption = "Generating enrichment plot...",
-            color = "#15131e"
+            color = "#2f2a20"
           )
         )
       )
