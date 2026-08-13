@@ -133,7 +133,13 @@ server <- function(input, output, session) {
         file.exists(conduit_rds_path),
         paste0("CONDUIT_RDS names a file this app cannot see: ", conduit_rds_path)
       ))
-      announce_loading(basename(conduit_rds_path))
+      # No modal here — see the processing observer below. A preloaded run is
+      # read before the user has done anything, so a blocking announcement
+      # would land on a UI they have not touched yet.
+      showNotification(
+        paste0("Opening ", basename(conduit_rds_path)),
+        type = "message", duration = 6
+      )
       return(readRDS(conduit_rds_path))
     }
 
@@ -361,6 +367,24 @@ server <- function(input, output, session) {
     shinyalert::closeAlert()
     new_qf
   }, ignoreInit = FALSE)
+
+  # Drive the first processing pass for a preloaded run.
+  #
+  # final_qf() is an eventReactive and therefore lazy: it computes only when
+  # something reads it, and the things that read it are outputs inside the
+  # data tabs — which Shiny suspends while their tab is unselected. On an
+  # upload that is harmless, because the user is already clicking through the
+  # UI by the time the object exists. Opening straight into a run, nobody has
+  # clicked anything, so without this the assay stays unprocessed until the
+  # first tab visit.
+  #
+  # try() because an observer that throws takes the session down with it; a
+  # failure here should surface through the outputs that show the data, not
+  # as a dead app.
+  observe({
+    req(nzchar(conduit_rds_path))
+    try(final_qf(), silent = TRUE)
+  })
 
   ##############################################################################
   # Analysis
