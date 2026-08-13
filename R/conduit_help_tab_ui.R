@@ -272,7 +272,7 @@ conduit_help_tab_ui <- function() {
     # ── Report a Bug ─────────────────────────────────────────────────────────
     div(
       class = "mt-4 p-3 rounded",
-      style = "background: rgba(243,178,75,0.1); border-left: 4px solid #f3b24b;",
+      style = "background: rgba(243,178,75,0.1); border-left: 4px solid #d4915c;",
       div(
         class = "d-flex align-items-center justify-content-between gap-3",
         div(

@@ -4,8 +4,8 @@ conduit_diann_qc_tab_ui <- function(id = "diann_qc") {
     sidebar = bslib::sidebar(
       title  = "Controls",
       width  = 260,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       uiOutput(ns("diann_qc_columns_ui"))
     ),
     tagList(
@@ -16,7 +16,7 @@ conduit_diann_qc_tab_ui <- function(id = "diann_qc") {
         bslib::card_body(
           shinycssloaders::withSpinner(
             plotOutput(ns("diann_qc_plot"), height = "580px"),
-            type = 8, caption = "Loading QC plot...", color = "#15131e"
+            type = 8, caption = "Loading QC plot...", color = "#2f2a20"
           )
         )
       ),
@@ -27,7 +27,7 @@ conduit_diann_qc_tab_ui <- function(id = "diann_qc") {
         bslib::card_body(
           shinycssloaders::withSpinner(
             DT::dataTableOutput(ns("diann_qc_table")),
-            type = 8, caption = "Loading statistics table...", color = "#15131e"
+            type = 8, caption = "Loading statistics table...", color = "#2f2a20"
           )
         ),
         bslib::card_footer(

@@ -11,8 +11,8 @@ conduit_sidebar_ui <- function() {
   bslib::sidebar(
     id    = "main_sidebar",
     width = 220,
-    bg    = "#15131e",
-    fg    = "#ffffff",
+    bg    = "#18150f",
+    fg    = "#efe6d2",
     open  = "always",
     tags$nav(
       class = "nav flex-column conduit-nav mt-1",

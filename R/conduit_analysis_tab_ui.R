@@ -6,8 +6,8 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
     bslib::sidebar(
       title  = "Plot Controls",
       width  = width,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       ...
     )
   }
@@ -25,7 +25,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
           "Feature Numbers",
           shinycssloaders::withSpinner(
             plotOutput(ns("feature_number_plot"), height = "600px"),
-            type = 8, caption = "Loading feature number plot...", color = "#15131e"
+            type = 8, caption = "Loading feature number plot...", color = "#2f2a20"
           )
         ),
 
@@ -38,7 +38,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             ),
             shinycssloaders::withSpinner(
               plotOutput(ns("missing_value_plot"), height = "600px"),
-              type = 8, caption = "Loading missing value heatmap...", color = "#15131e"
+              type = 8, caption = "Loading missing value heatmap...", color = "#2f2a20"
             )
           )
         ),
@@ -51,7 +51,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             ),
             shinycssloaders::withSpinner(
               plotOutput(ns("sample_cor_heatmap"), height = "600px"),
-              type = 8, caption = "Loading sample correlation heatmap...", color = "#15131e"
+              type = 8, caption = "Loading sample correlation heatmap...", color = "#2f2a20"
             )
           )
         ),
@@ -60,7 +60,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
           "Intensity Distribution",
           shinycssloaders::withSpinner(
             plotOutput(ns("intensity_distribution_plot"), height = "600px"),
-            type = 8, caption = "Loading intensity distribution...", color = "#15131e"
+            type = 8, caption = "Loading intensity distribution...", color = "#2f2a20"
           )
         ),
 
@@ -72,7 +72,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             ),
             shinycssloaders::withSpinner(
               plotOutput(ns("density_plot"), height = "600px"),
-              type = 8, caption = "Loading density plot...", color = "#15131e"
+              type = 8, caption = "Loading density plot...", color = "#2f2a20"
             )
           )
         )
@@ -90,7 +90,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
         ),
         shinycssloaders::withSpinner(
           plotOutput(ns("pca_plot"), height = "600px"),
-          type = 8, caption = "Loading PCA plot...", color = "#15131e"
+          type = 8, caption = "Loading PCA plot...", color = "#2f2a20"
         )
       )
     ),
@@ -121,7 +121,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
         ),
         shinycssloaders::withSpinner(
           plotOutput(ns("relative_abundance_plot"), height = "600px"),
-          type = 8, caption = "Loading relative abundance plot...", color = "#15131e"
+          type = 8, caption = "Loading relative abundance plot...", color = "#2f2a20"
         )
       )
     ),
@@ -177,7 +177,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
         ),
         shinycssloaders::withSpinner(
           plotOutput(ns("explore_plot"), height = "600px"),
-          type = 8, caption = "Building plot...", color = "#15131e"
+          type = 8, caption = "Building plot...", color = "#2f2a20"
         )
       )
     ),
@@ -189,8 +189,8 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
         sidebar = bslib::sidebar(
           title  = "Analysis Controls",
           width  = 300,
-          bg     = "#f8f9fb",
-          fg     = "#1a1a2e",
+          bg     = "#faf6ee",
+          fg     = "#3b352a",
           open   = "open",
           bslib::accordion(
             open = TRUE,
@@ -235,7 +235,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
               bslib::card_body(
                 shinycssloaders::withSpinner(
                   plotly::plotlyOutput(ns("limma_volcano_plot"), height = "480px"),
-                  type = 8, caption = "Loading volcano plot...", color = "#15131e"
+                  type = 8, caption = "Loading volcano plot...", color = "#2f2a20"
                 )
               )
             ),
@@ -254,7 +254,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
               bslib::card_body(
                 shinycssloaders::withSpinner(
                   plotOutput(ns("selected_feature_plot"), height = "480px"),
-                  type = 8, caption = "Loading feature plot...", color = "#15131e"
+                  type = 8, caption = "Loading feature plot...", color = "#2f2a20"
                 )
               )
             )
@@ -266,7 +266,7 @@ conduit_analysis_tab_ui <- function(id = "analysis") {
             bslib::card_body(
               shinycssloaders::withSpinner(
                 DT::DTOutput(ns("limma_statistics_table")),
-                type = 8, caption = "Loading statistics table...", color = "#15131e"
+                type = 8, caption = "Loading statistics table...", color = "#2f2a20"
               )
             ),
             bslib::card_footer(

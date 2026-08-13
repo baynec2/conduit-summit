@@ -4,8 +4,8 @@ conduit_traverse_tab_ui <- function(id = "traverse") {
     sidebar = bslib::sidebar(
       title  = "Controls",
       width  = 280,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       open   = "open",
       p(
         class = "text-muted small mb-2",
@@ -29,7 +29,7 @@ conduit_traverse_tab_ui <- function(id = "traverse") {
         bslib::card_body(
           shinycssloaders::withSpinner(
             plotly::plotlyOutput(ns("qf_plot"), height = "480px"),
-            type = 8, caption = "Loading feature hierarchy...", color = "#15131e"
+            type = 8, caption = "Loading feature hierarchy...", color = "#2f2a20"
           )
         )
       ),
@@ -42,7 +42,7 @@ conduit_traverse_tab_ui <- function(id = "traverse") {
           bslib::card_body(
             shinycssloaders::withSpinner(
               plotOutput(ns("traverse_plot"), height = "460px"),
-              type = 8, caption = "Loading intensity plot...", color = "#15131e"
+              type = 8, caption = "Loading intensity plot...", color = "#2f2a20"
             )
           )
         ),
@@ -53,7 +53,7 @@ conduit_traverse_tab_ui <- function(id = "traverse") {
           bslib::card_body(
             shinycssloaders::withSpinner(
               DT::DTOutput(ns("traverse_info")),
-              type = 8, caption = "Loading feature details...", color = "#15131e"
+              type = 8, caption = "Loading feature details...", color = "#2f2a20"
             )
           )
         )
