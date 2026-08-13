@@ -4,6 +4,20 @@ library(waiter)
 library(digest)
 library(future)
 future::plan(multisession)
+
+# ── Basecamp handoff ─────────────────────────────────────────────────────────
+# Conduit-Basecamp runs this app inside the pipeline's container and points
+# CONDUIT_RDS at a finished run's output, which is already on the bind the
+# workflow wrote it to. When it is set the app opens straight into that run.
+# When it is empty — anyone running Summit on its own — the Home tab's upload
+# button drives everything exactly as before.
+#
+# Uploading is not a workable substitute under Basecamp: the browse dialog
+# would show the *container's* filesystem rather than anything the user
+# recognizes, and Shiny's upload path copies the whole object through the
+# browser (capped at 500MB in ui.R) when the file is already on local disk.
+conduit_rds_path <- Sys.getenv("CONDUIT_RDS")
+
 # Server
 server <- function(input, output, session) {
   ##############################################################################
@@ -28,20 +42,35 @@ server <- function(input, output, session) {
   observeEvent(input$step_goto_traverse,    { bslib::nav_select("main_tabs", "traverse") })
   observeEvent(input$goto_ai_from_about,    { bslib::nav_select("main_tabs", "ai") })
 
-  # Workflow step locking — steps 2-8 locked until file is uploaded
+  # Whether we have data to show, from either source. Deliberately cheap: the
+  # gates below only need to know that an object is coming, and making them
+  # depend on conduit_obj() would force the .rds to be read inside an observer,
+  # where a bad path surfaces as a dead session instead of a message.
+  data_ready <- reactive({
+    nzchar(conduit_rds_path) || !is.null(input$conduit_rds)
+  })
+
+  # Under Basecamp the run has already been chosen, so the upload control has
+  # nothing useful to do — and its browse dialog would show the container's
+  # filesystem. Hide it rather than invite a dead end.
+  observe({
+    if (nzchar(conduit_rds_path)) shinyjs::hide("conduit_rds")
+  })
+
+  # Workflow step locking — steps 2-8 locked until data is loaded
   locked_steps <- c("step_2", "step_3", "step_4", "step_5", "step_6", "step_7", "step_8")
   observe({
     lapply(locked_steps, function(id) shinyjs::addClass(id, "workflow-locked"))
     shinyjs::disable("goto_ai_from_about")
   })
   observe({
-    req(input$conduit_rds)
+    req(data_ready())
     lapply(locked_steps, function(id) shinyjs::removeClass(id, "workflow-locked"))
     shinyjs::enable("goto_ai_from_about")
   })
 
   ##############################################################################
-  # Tab visibility — hide data-dependent tabs until file is uploaded
+  # Tab visibility — hide data-dependent tabs until data is loaded
   ##############################################################################
   data_tabs <- c("database", "diann_qc", "view_metadata", "filter_data", "view_assay", "analysis", "traverse", "ai")
 
@@ -51,7 +80,7 @@ server <- function(input, output, session) {
   })
 
   observe({
-    req(input$conduit_rds)
+    req(data_ready())
     lapply(data_tabs, function(tab) bslib::nav_show("main_tabs", tab, select = FALSE))
   })
 
@@ -70,14 +99,13 @@ server <- function(input, output, session) {
   ###############################################################################
   # Loading + Manipulating Data
   ###############################################################################
-  # Read in data from .rds conduit output
-  conduit_obj <- reactive({
-    req(input$conduit_rds) # Ensure file is uploaded
-
+  # Announce the load and the defaults it will be processed with. Closed again
+  # by final_qf() once processing finishes.
+  announce_loading <- function(display_name) {
     shinyalert::shinyalert(
       title = "Loading Data",
       text  = HTML(paste0(
-        "<p>Your <b>", input$conduit_rds$name, "</b> file is being loaded.</p>",
+        "<p>Your <b>", display_name, "</b> file is being loaded.</p>",
         "<p>Once loaded, data will be processed with the following default settings:</p>",
         "<ul>",
         "<li><b>Log base:</b> ", input$log_base, "</li>",
@@ -94,7 +122,23 @@ server <- function(input, output, session) {
       showConfirmButton   = FALSE,
       size                = "l"
     )
+  }
 
+  # The object under analysis, from whichever source supplied it. Everything
+  # downstream — qf, metrics, rowData, colData, and every tab module — derives
+  # from this one reactive, so the Basecamp handoff needs no plumbing past here.
+  conduit_obj <- reactive({
+    if (nzchar(conduit_rds_path)) {
+      validate(need(
+        file.exists(conduit_rds_path),
+        paste0("CONDUIT_RDS names a file this app cannot see: ", conduit_rds_path)
+      ))
+      announce_loading(basename(conduit_rds_path))
+      return(readRDS(conduit_rds_path))
+    }
+
+    req(input$conduit_rds) # Ensure file is uploaded
+    announce_loading(input$conduit_rds$name)
     readRDS(input$conduit_rds$datapath)
   })
 
