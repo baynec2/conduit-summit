@@ -12,9 +12,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Pinned to match renv.lock and the Dockerfile's rocker/shiny:4.5.
+      #
+      # Left unpinned this tracks whatever R is current, and it drifted onto
+      # 4.6, where R_NamespaceRegistry is no longer declared. cpp11 0.5.3 —
+      # the version renv.lock pins — still references it, so igraph failed to
+      # compile and renv::restore() aborted before the deploy step ran. The
+      # Docker build was unaffected because it pins its R; this was the only
+      # place R was free to move.
+      #
+      # Keep this in step with renv.lock's R version and the Dockerfile base
+      # image. Moving to a newer R means changing all three together.
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
+          r-version: '4.5.2'
           use-public-rspm: true
 
       - name: Install system dependencies
