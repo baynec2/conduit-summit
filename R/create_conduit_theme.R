@@ -2,81 +2,131 @@
 create_conduit_theme <- function() {
   bslib::bs_theme(
     version  = 5,
-    bg       = "#f0f2f5",
-    fg       = "#1a1a2e",
-    primary  = "#15131e",
-    warning  = "#f3b24b",
-    "navbar-bg"            = "#000000",
-    "navbar-color"         = "#ffffff",
-    "navbar-brand-color"   = "#ffffff",
-    "sidebar-bg"           = "#15131e",
-    "sidebar-fg"           = "#ffffff",
-    "sidebar-border-color" = "#2a2840",
+    # Summit stays LIGHT. Its content is figures, and figures need a light
+    # ground to stay readable on screen and printable off it — an app whose
+    # substance is plots will fight dark chrome no matter how carefully the
+    # surround is tuned. That was tried and it did not work.
+    #
+    # What aligns it with Conduit Basecamp instead is the hue family. Summit's
+    # neutrals were cool — blue-blacks and grey-blues — against Basecamp's
+    # deliberately warm palette, which is what made the two read as different
+    # products even where both were light. Everything below is Basecamp's
+    # warm scale, its specimen copper, and its type; only the value is
+    # inverted, so the two look related without the content having to suffer.
+    bg       = "#f4efe6",
+    fg       = "#3b352a",
+    primary  = "#2f2a20",
+    warning  = "#d4915c",
+    danger   = "#b0563f",
+    success  = "#6c7a3f",
+    # Albert Sans and JetBrains Mono, from the same Google Fonts source
+    # Basecamp loads them from, so the two match rather than merely rhyme.
+    #
+    # local = FALSE deliberately: the default downloads the font server-side
+    # while building the theme, which would put a network call inside the
+    # analysis container at every startup — a hang or a hard failure on a
+    # station with no route out. Linking them puts the fetch in the browser,
+    # where a miss degrades to the fallback stack.
+    # wght matters as much as the family. Requesting the family alone fetches
+    # weight 400 only, and the CSS below asks for 600, 700 and 800 — so the
+    # browser fakes every bold by smearing the regular glyphs. That reads as
+    # soft, slightly blurred text, and it is worst exactly where this app
+    # uses it most: small uppercase letter-spaced card headers.
+    #
+    # Every weight is listed rather than given as endpoints: bslib emits
+    # `wght@0,300;0,800` for c(300, 800) — the two values, not the range
+    # between them — so 600 and 700 would snap to whichever loaded weight is
+    # nearest instead of being drawn at the weight asked for.
+    base_font    = bslib::font_google("Albert Sans", local = FALSE,
+                                      wght = c(300, 400, 500, 600, 700, 800),
+                                      ital = c(0, 1)),
+    heading_font = bslib::font_google("Albert Sans", local = FALSE,
+                                      wght = c(300, 400, 500, 600, 700, 800),
+                                      ital = c(0, 1)),
+    code_font    = bslib::font_google("JetBrains Mono", local = FALSE,
+                                      wght = c(400, 500, 600, 700),
+                                      ital = c(0, 1)),
+    # Chrome takes Basecamp's warm near-blacks, so the navbar and sidebar are
+    # continuous with the app Summit is embedded in, while the content area
+    # stays a light document surface.
+    "navbar-bg"            = "#18150f",
+    "navbar-color"         = "#efe6d2",
+    "navbar-brand-color"   = "#fff3d8",
+    "sidebar-bg"           = "#18150f",
+    "sidebar-fg"           = "#efe6d2",
+    "sidebar-border-color" = "#2a241b",
     "card-bg"              = "#ffffff",
-    "card-border-color"    = "rgba(21, 19, 30, 0.1)",
-    "card-cap-bg"          = "#000000",
-    "card-cap-color"       = "#ffffff",
+    "card-border-color"    = "rgba(47, 42, 32, 0.12)",
+    "card-cap-bg"          = "#221d15",
+    "card-cap-color"       = "#fff3d8",
     "card-border-radius"   = "0.6rem"
   ) |>
     bslib::bs_add_rules("
+    /* Basecamp enables the same stylistic sets on its body text, which
+       changes the letterforms themselves — without these the two apps use
+       visibly different glyphs for the same family. */
+    body {
+      font-feature-settings: 'ss01', 'cv11';
+    }
+
     /* ── Top navbar tab links ───────────────────────────── */
     .navbar .navbar-nav .nav-link {
-      color: rgba(255, 255, 255, 0.72) !important;
+      color: rgba(239, 230, 210, 0.78) !important;
       font-size: 0.875rem;
       padding: 0.5rem 0.8rem;
       border-radius: 0.35rem;
       transition: color 0.15s ease, background-color 0.15s ease;
     }
     .navbar .navbar-nav .nav-link:hover {
-      color: #f3b24b !important;
-      background-color: rgba(255, 255, 255, 0.06);
+      color: #d4915c !important;
+      background-color: rgba(212, 145, 92, 0.10);
     }
     .navbar .navbar-nav .nav-link.active {
-      color: #f3b24b !important;
+      color: #d4915c !important;
       font-weight: 600;
-      background-color: rgba(243, 178, 75, 0.12);
+      background-color: rgba(212, 145, 92, 0.12);
     }
 
     /* ── Cards: soft shadow + white body ────────────────── */
     .card {
-      box-shadow: 0 1px 3px rgba(21, 19, 30, 0.06),
-                  0 4px 10px rgba(21, 19, 30, 0.04);
-      border: 1px solid rgba(21, 19, 30, 0.08) !important;
+      box-shadow: 0 1px 3px rgba(47, 42, 32, 0.06),
+                  0 4px 10px rgba(47, 42, 32, 0.04);
+      border: 1px solid rgba(47, 42, 32, 0.08) !important;
       transition: box-shadow 0.18s ease;
     }
     .card:hover {
-      box-shadow: 0 2px 8px rgba(21, 19, 30, 0.09),
-                  0 6px 16px rgba(21, 19, 30, 0.06);
+      box-shadow: 0 2px 8px rgba(47, 42, 32, 0.09),
+                  0 6px 16px rgba(47, 42, 32, 0.06);
     }
     .card > .card-header {
-      background-color: #000000 !important;
-      color: #ffffff !important;
+      background-color: #18150f !important;
+      color: #fff3d8 !important;
       font-weight: 600;
       font-size: 0.82rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      border-bottom: 3px solid #f3b24b !important;
+      border-bottom: 3px solid #d4915c !important;
       border-radius: 0.55rem 0.55rem 0 0 !important;
       padding: 0.6rem 1rem;
     }
     .card > .card-footer {
-      background: #fafafa;
-      border-top: 1px solid rgba(21, 19, 30, 0.06);
+      background: #faf6ee;
+      border-top: 1px solid rgba(47, 42, 32, 0.06);
       padding: 0.5rem 1rem;
     }
 
     /* ── Light card variant (plot containers) ────────────── */
     .card.card-light > .card-header {
       background-color: #ffffff !important;
-      color: #1a1a2e !important;
-      border-bottom: 2px solid #f3b24b !important;
+      color: #3b352a !important;
+      border-bottom: 2px solid #d4915c !important;
       font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
     .card.card-light {
-      border-top: 3px solid #f3b24b !important;
+      border-top: 3px solid #d4915c !important;
     }
 
     /* ── Borderless card variant ─────────────────────────── */
@@ -87,8 +137,8 @@ create_conduit_theme <- function() {
     }
     .card.card-borderless > .card-header {
       background: transparent !important;
-      color: #1a1a2e !important;
-      border-bottom: 1px solid rgba(21, 19, 30, 0.1) !important;
+      color: #3b352a !important;
+      border-bottom: 1px solid rgba(47, 42, 32, 0.1) !important;
       text-transform: none;
       letter-spacing: 0;
     }
@@ -97,8 +147,8 @@ create_conduit_theme <- function() {
     /* Target both class orderings bslib may render */
     .card > .card-header.bslib-navs-top,
     .bslib-card > .bslib-navs-top {
-      background-color: #000000 !important;
-      border-bottom: 3px solid #f3b24b !important;
+      background-color: #18150f !important;
+      border-bottom: 3px solid #d4915c !important;
       padding: 0.3rem 0.75rem 0 !important;
       text-transform: none;
       letter-spacing: 0;
@@ -107,9 +157,9 @@ create_conduit_theme <- function() {
     .card > .card-header .nav-link,
     .card > .card-header.bslib-navs-top .nav-link,
     .bslib-card > .bslib-navs-top .nav-link {
-      color: rgba(255,255,255,0.72) !important;
-      --bs-nav-link-color: rgba(255,255,255,0.72);
-      --bs-nav-tabs-link-color: rgba(255,255,255,0.72);
+      color: rgba(239, 230, 210, 0.78) !important;
+      --bs-nav-link-color: rgba(239, 230, 210, 0.78);
+      --bs-nav-tabs-link-color: rgba(239, 230, 210, 0.78);
       font-size: 0.85rem;
       padding: 0.45rem 0.9rem;
       border-radius: 0.35rem 0.35rem 0 0;
@@ -117,46 +167,46 @@ create_conduit_theme <- function() {
     }
     .card > .card-header .nav-link:hover,
     .card > .card-header.bslib-navs-top .nav-link:hover {
-      color: #ffffff !important;
-      background: rgba(243,178,75,0.15);
+      color: #fff3d8 !important;
+      background: rgba(212, 145, 92,0.15);
     }
     .card > .card-header .nav-link.active,
     .card > .card-header.bslib-navs-top .nav-link.active,
     .bslib-card > .bslib-navs-top .nav-link.active {
-      background: #f3b24b !important;
-      color: #15131e !important;
+      background: #d4915c !important;
+      color: #2f2a20 !important;
       font-weight: 600;
     }
     /* tab-content only: reset Bootstrap dark-mode bleedthrough from dark header.
        Scoped to .tab-content so value boxes and regular cards are unaffected. */
     .tab-content {
-      --bs-body-color: #1a1a2e;
+      --bs-body-color: #3b352a;
       --bs-body-bg: #ffffff;
-      color: #1a1a2e;
+      color: #3b352a;
     }
 
     /* ── navset_underline (QC sub-tabs) ─────────────────── */
     .nav-underline .nav-link {
-      color: #15131e;
+      color: #2f2a20;
       font-size: 0.85rem;
       padding: 0.4rem 0.8rem;
     }
     .nav-underline .nav-link.active {
-      color: #15131e !important;
-      border-bottom-color: #f3b24b !important;
+      color: #2f2a20 !important;
+      border-bottom-color: #d4915c !important;
       font-weight: 600;
     }
     .nav-underline .nav-link:hover {
-      color: #15131e;
-      border-bottom-color: rgba(243,178,75,0.5) !important;
+      color: #2f2a20;
+      border-bottom-color: rgba(212, 145, 92,0.5) !important;
     }
 
     /* ── Value boxes ─────────────────────────────────────── */
     .bslib-value-box {
       border-radius: 0.6rem !important;
-      border: 1px solid rgba(21, 19, 30, 0.08) !important;
-      box-shadow: 0 1px 3px rgba(21, 19, 30, 0.06),
-                  0 4px 10px rgba(21, 19, 30, 0.04) !important;
+      border: 1px solid rgba(47, 42, 32, 0.08) !important;
+      box-shadow: 0 1px 3px rgba(47, 42, 32, 0.06),
+                  0 4px 10px rgba(47, 42, 32, 0.04) !important;
     }
 
     /* ── Card body padding ───────────────────────────────── */
@@ -167,45 +217,45 @@ create_conduit_theme <- function() {
        the tab-content body, making all form text white on white.
        Explicitly reset everything inside .tab-content to dark. */
     .tab-content {
-      color: #1a1a2e;
+      color: #3b352a;
     }
     .tab-content label,
     .tab-content .form-label,
     .tab-content .control-label,
     .tab-content .shiny-input-label {
-      color: #1a1a2e !important;
+      color: #3b352a !important;
     }
     .tab-content .form-control,
     .tab-content .form-select,
     .tab-content input[type='text'],
     .tab-content input[type='number'] {
-      color: #1a1a2e !important;
+      color: #3b352a !important;
       background-color: #ffffff !important;
     }
     .tab-content .selectize-input,
     .tab-content .selectize-dropdown {
-      color: #1a1a2e !important;
+      color: #3b352a !important;
       background-color: #ffffff !important;
     }
     .tab-content .accordion-button {
-      color: #1a1a2e !important;
-      background-color: #f8f9fb !important;
+      color: #3b352a !important;
+      background-color: #faf6ee !important;
     }
     .tab-content .accordion-body {
-      color: #1a1a2e !important;
+      color: #3b352a !important;
     }
 
     /* ── In-tab control sidebars ─────────────────────────── */
     /* sidebar-fg:#fff (for the dark nav sidebar) bleeds into layout_sidebar
        panels — explicitly reset all text to dark here */
     .bslib-sidebar-layout > .sidebar {
-      color: #1a1a2e;
+      color: #3b352a;
       font-size: 0.875rem;
     }
     .bslib-sidebar-layout > .sidebar .form-label,
     .bslib-sidebar-layout > .sidebar label,
     .bslib-sidebar-layout > .sidebar .control-label {
-      color: #444455;
+      color: #57503f;
       font-size: 0.82rem;
       font-weight: 600;
       margin-bottom: 0.2rem;
@@ -213,39 +263,39 @@ create_conduit_theme <- function() {
     .bslib-sidebar-layout > .sidebar p,
     .bslib-sidebar-layout > .sidebar small,
     .bslib-sidebar-layout > .sidebar .text-muted {
-      color: #6c757d !important;
+      color: #6f6552 !important;
     }
     .bslib-sidebar-layout > .sidebar .form-control,
     .bslib-sidebar-layout > .sidebar .form-select,
     .bslib-sidebar-layout > .sidebar .selectize-input {
-      color: #1a1a2e;
+      color: #3b352a;
       background-color: #ffffff;
     }
     .bslib-sidebar-layout > .sidebar hr {
-      border-color: rgba(21, 19, 30, 0.12);
+      border-color: rgba(47, 42, 32, 0.12);
       margin: 0.75rem 0;
     }
     .bslib-sidebar-layout > .sidebar .sidebar-title {
-      color: #888899;
+      color: #6f6552;
       font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid #f3b24b;
+      border-bottom: 2px solid #d4915c;
       margin-bottom: 1rem;
     }
     /* Accordion items within sidebars */
     .bslib-sidebar-layout > .sidebar .accordion-button {
-      color: #1a1a2e;
-      background-color: #f8f9fb;
+      color: #3b352a;
+      background-color: #faf6ee;
     }
     .bslib-sidebar-layout > .sidebar .accordion-body {
-      color: #1a1a2e;
+      color: #3b352a;
     }
     /* Sidebar toggle button */
     .bslib-sidebar-layout .collapse-toggle {
-      color: #15131e !important;
+      color: #2f2a20 !important;
       opacity: 0.5;
     }
     .bslib-sidebar-layout .collapse-toggle:hover {
@@ -259,15 +309,15 @@ create_conduit_theme <- function() {
       padding: 0.55rem 0.75rem;
     }
     .accordion-button:not(.collapsed) {
-      color: #15131e;
-      background-color: rgba(243, 178, 75, 0.12);
+      color: #2f2a20;
+      background-color: rgba(212, 145, 92, 0.12);
       box-shadow: none;
     }
     .accordion-button::after {
       filter: none;
     }
     .accordion-item {
-      border-color: rgba(21, 19, 30, 0.1);
+      border-color: rgba(47, 42, 32, 0.1);
     }
     .accordion-body {
       padding: 0.5rem 0.75rem;
@@ -275,7 +325,7 @@ create_conduit_theme <- function() {
 
     /* ── About page hero ─────────────────────────────────── */
     .conduit-hero {
-      background: #000000;
+      background: #18150f;
       border-radius: 1rem;
       color: #fff;
       padding: 3.5rem 2rem;
@@ -297,8 +347,8 @@ create_conduit_theme <- function() {
       pointer-events: none;
       z-index: 1;
       background-image:
-        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+        linear-gradient(rgba(212, 145, 92, 0.10) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 145, 92, 0.10) 1px, transparent 1px);
       background-size: 80px 80px;
       -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 85%);
       mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 40%, transparent 85%);
@@ -308,20 +358,20 @@ create_conduit_theme <- function() {
       z-index: 2;
     }
     .conduit-hero-title {
-      color: #f3b24b;
+      color: #d4915c;
       font-weight: 800;
       font-size: 2.4rem;
       margin-bottom: 0.75rem;
     }
     .conduit-hero-subtitle {
-      color: rgba(255, 255, 255, 0.78);
+      color: rgba(239, 230, 210, 0.78);
       font-size: 1.05rem;
       max-width: 460px;
       margin: 0 auto 1.25rem;
     }
     .conduit-feature-icon {
       font-size: 1.8rem;
-      color: #f3b24b;
+      color: #d4915c;
       margin-bottom: 0.6rem;
     }
     /* Hero upload widget */
@@ -330,7 +380,7 @@ create_conduit_theme <- function() {
       margin: 0 auto;
     }
     .conduit-hero-upload .form-control {
-      background: rgba(255,255,255,0.08);
+      background: rgba(212, 145, 92, 0.10);
       border-color: rgba(255,255,255,0.25);
       color: rgba(255,255,255,0.85);
     }
@@ -338,14 +388,14 @@ create_conduit_theme <- function() {
       color: rgba(255,255,255,0.45);
     }
     .conduit-hero-upload .btn {
-      background: #f3b24b;
-      border-color: #f3b24b;
-      color: #15131e;
+      background: #d4915c;
+      border-color: #d4915c;
+      color: #2f2a20;
       font-weight: 600;
     }
     .conduit-hero-upload .btn:hover {
-      background: #e0a040;
-      border-color: #e0a040;
+      background: #a86a3a;
+      border-color: #a86a3a;
     }
     /* Success banner inside hero */
     .conduit-hero .alert-success {
@@ -357,7 +407,7 @@ create_conduit_theme <- function() {
     .workflow-step-number {
       font-size: 2rem;
       font-weight: 800;
-      color: #f3b24b;
+      color: #d4915c;
       line-height: 1;
     }
     .workflow-step.workflow-locked {
@@ -365,50 +415,50 @@ create_conduit_theme <- function() {
       pointer-events: none;
     }
     .workflow-step-card {
-      border-top: 3px solid #f3b24b !important;
+      border-top: 3px solid #d4915c !important;
       border-left: none !important;
       border-right: none !important;
       border-bottom: none !important;
       transition: box-shadow 0.2s ease, transform 0.2s ease !important;
     }
     .workflow-step-card:hover {
-      box-shadow: 0 6px 24px rgba(21, 19, 30, 0.12), 0 2px 8px rgba(21, 19, 30, 0.08) !important;
+      box-shadow: 0 6px 24px rgba(47, 42, 32, 0.12), 0 2px 8px rgba(47, 42, 32, 0.08) !important;
       transform: translateY(-3px);
     }
     .workflow-step-card .workflow-icon-circle {
       width: 52px;
       height: 52px;
       border-radius: 50%;
-      background: rgba(243, 178, 75, 0.12);
+      background: rgba(212, 145, 92, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
-      color: #f3b24b;
+      color: #d4915c;
       margin: 0 auto 0.5rem;
       transition: background 0.18s ease;
     }
     .workflow-step-card:hover .workflow-icon-circle {
-      background: rgba(243, 178, 75, 0.22);
+      background: rgba(212, 145, 92, 0.22);
     }
     .workflow-step-card .workflow-step-number {
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #f3b24b;
+      color: #d4915c;
       line-height: 1;
     }
     .workflow-step-card h6 {
       font-weight: 700;
       font-size: 0.9rem;
-      color: #1a1a2e;
+      color: #3b352a;
       margin-bottom: 0.4rem !important;
     }
 
     /* ── Help page ───────────────────────────────────────── */
     .conduit-help-hero {
-      background: #000000;
+      background: #18150f;
       border-radius: 0.75rem;
       color: #fff;
       padding: 2.25rem 2rem;
@@ -418,17 +468,17 @@ create_conduit_theme <- function() {
       overflow: hidden;
     }
     .conduit-help-hero h2 {
-      color: #f3b24b;
+      color: #d4915c;
       font-weight: 800;
       margin-bottom: 0.4rem;
     }
     .conduit-help-hero p {
-      color: rgba(255,255,255,0.75);
+      color: rgba(239, 230, 210, 0.78);
       margin-bottom: 0;
       font-size: 0.95rem;
     }
     .conduit-ecosystem-card {
-      border-top: 4px solid #f3b24b !important;
+      border-top: 4px solid #d4915c !important;
       text-align: center;
       height: 100%;
     }
@@ -442,12 +492,12 @@ create_conduit_theme <- function() {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: rgba(243,178,75,0.15);
+      background: rgba(212, 145, 92,0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
-      color: #f3b24b;
+      color: #d4915c;
       margin-bottom: 0.25rem;
     }
     .conduit-quickstart-step {
@@ -456,24 +506,24 @@ create_conduit_theme <- function() {
       gap: 1rem;
       padding: 0.9rem 1rem;
       border-radius: 0.5rem;
-      background: #f8f9fb;
-      border-left: 4px solid #f3b24b;
+      background: #faf6ee;
+      border-left: 4px solid #d4915c;
       margin-bottom: 0.6rem;
     }
     .conduit-quickstart-num {
       font-size: 1.5rem;
       font-weight: 800;
-      color: #f3b24b;
+      color: #d4915c;
       line-height: 1.2;
       flex-shrink: 0;
     }
 
     /* ── Page footer ────────────────────────────────────── */
     .conduit-footer {
-      border-top: 1px solid rgba(21, 19, 30, 0.1);
+      border-top: 1px solid rgba(47, 42, 32, 0.1);
       padding: 0.65rem 1.5rem;
       font-size: 0.8rem;
-      color: #6c757d;
+      color: #6f6552;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -483,31 +533,31 @@ create_conduit_theme <- function() {
     /* ── DataTables styling ──────────────────────────────── */
     table.dataTable thead th,
     table.dataTable thead td {
-      background-color: #f8f9fb;
-      color: #1a1a2e;
+      background-color: #faf6ee;
+      color: #3b352a;
       font-size: 0.76rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      border-bottom: 2px solid #f3b24b !important;
+      border-bottom: 2px solid #d4915c !important;
       border-top: none;
     }
     table.dataTable thead th:hover {
-      background-color: rgba(243, 178, 75, 0.12);
+      background-color: rgba(212, 145, 92, 0.12);
     }
     table.dataTable tbody tr {
       font-size: 0.875rem;
     }
     table.dataTable tbody tr:hover > * {
-      background-color: rgba(243, 178, 75, 0.07) !important;
-      color: #1a1a2e;
+      background-color: rgba(212, 145, 92, 0.07) !important;
+      color: #3b352a;
     }
     table.dataTable.table-sm > tbody > tr > td {
       padding: 0.35rem 0.6rem;
     }
     /* Search box */
     .dataTables_filter input {
-      border: 1px solid rgba(21, 19, 30, 0.18);
+      border: 1px solid rgba(47, 42, 32, 0.18);
       border-radius: 0.35rem;
       padding: 0.3rem 0.65rem;
       font-size: 0.85rem;
@@ -515,8 +565,8 @@ create_conduit_theme <- function() {
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .dataTables_filter input:focus {
-      border-color: #f3b24b;
-      box-shadow: 0 0 0 3px rgba(243, 178, 75, 0.18);
+      border-color: #d4915c;
+      box-shadow: 0 0 0 3px rgba(212, 145, 92, 0.18);
     }
     .dataTables_filter label {
       font-size: 0 !important;
@@ -528,7 +578,7 @@ create_conduit_theme <- function() {
     /* Info + pagination */
     .dataTables_info {
       font-size: 0.8rem;
-      color: #888899;
+      color: #6f6552;
     }
     .dataTables_paginate .paginate_button {
       border-radius: 0.3rem !important;
@@ -539,19 +589,19 @@ create_conduit_theme <- function() {
     }
     .dataTables_paginate .paginate_button.current,
     .dataTables_paginate .paginate_button.current:hover {
-      background: #f3b24b !important;
-      border-color: #f3b24b !important;
-      color: #15131e !important;
+      background: #d4915c !important;
+      border-color: #d4915c !important;
+      color: #2f2a20 !important;
       font-weight: 700;
     }
     .dataTables_paginate .paginate_button:hover {
-      background: rgba(243, 178, 75, 0.15) !important;
-      border-color: rgba(243, 178, 75, 0.3) !important;
-      color: #15131e !important;
+      background: rgba(212, 145, 92, 0.15) !important;
+      border-color: rgba(212, 145, 92, 0.3) !important;
+      color: #2f2a20 !important;
     }
     .dataTables_paginate .paginate_button.disabled,
     .dataTables_paginate .paginate_button.disabled:hover {
-      color: #aaaaaa !important;
+      color: #a99c81 !important;
       background: transparent !important;
     }
 
@@ -568,26 +618,26 @@ theme_conduit <- function(base_size = 11, base_family = "") {
       panel.background   = ggplot2::element_rect(fill = "#ffffff", colour = NA),
       plot.background    = ggplot2::element_rect(fill = "#ffffff", colour = NA),
       panel.grid.major.x = ggplot2::element_blank(),
-      panel.grid.major.y = ggplot2::element_line(colour = "#e8eaed", linewidth = 0.45),
+      panel.grid.major.y = ggplot2::element_line(colour = "#e6ded0", linewidth = 0.45),
       panel.grid.minor   = ggplot2::element_blank(),
-      axis.line    = ggplot2::element_line(colour = "#c5c9d6", linewidth = 0.5),
-      axis.ticks   = ggplot2::element_line(colour = "#c5c9d6", linewidth = 0.4),
-      axis.text    = ggplot2::element_text(size = ggplot2::rel(0.88), colour = "#444455"),
-      axis.title   = ggplot2::element_text(size = ggplot2::rel(0.93), colour = "#1a1a2e"),
-      strip.background = ggplot2::element_rect(fill = "#f3b24b", colour = NA),
+      axis.line    = ggplot2::element_line(colour = "#cbc0ab", linewidth = 0.5),
+      axis.ticks   = ggplot2::element_line(colour = "#cbc0ab", linewidth = 0.4),
+      axis.text    = ggplot2::element_text(size = ggplot2::rel(0.88), colour = "#57503f"),
+      axis.title   = ggplot2::element_text(size = ggplot2::rel(0.93), colour = "#3b352a"),
+      strip.background = ggplot2::element_rect(fill = "#d4915c", colour = NA),
       strip.text       = ggplot2::element_text(
-        colour = "#15131e", face = "bold", size = ggplot2::rel(0.82)
+        colour = "#2f2a20", face = "bold", size = ggplot2::rel(0.82)
       ),
       legend.background = ggplot2::element_rect(fill = "#ffffff", colour = NA),
       legend.key        = ggplot2::element_rect(fill = "#ffffff", colour = NA),
       legend.title      = ggplot2::element_text(size = ggplot2::rel(0.85), face = "bold"),
       legend.text       = ggplot2::element_text(size = ggplot2::rel(0.82)),
       plot.title    = ggplot2::element_text(
-        size = ggplot2::rel(1.1), face = "bold", colour = "#15131e",
+        size = ggplot2::rel(1.1), face = "bold", colour = "#2f2a20",
         margin = ggplot2::margin(b = 6)
       ),
       plot.subtitle = ggplot2::element_text(
-        colour = "#6c757d", size = ggplot2::rel(0.9),
+        colour = "#6f6552", size = ggplot2::rel(0.9),
         margin = ggplot2::margin(b = 8)
       )
     )

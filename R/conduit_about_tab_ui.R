@@ -48,10 +48,10 @@ conduit_about_tab_ui <- function() {
           class = "conduit-hero-upload mt-3",
           p(
             "Upload the ",
-            tags$code(".rds", style = "color: #f3b24b; background: rgba(243,178,75,0.15); border: none;"),
+            tags$code(".rds", style = "color: #d4915c; background: rgba(243,178,75,0.15); border: none;"),
             " file produced by ",
             actionLink("goto_help_from_upload", "conduit-ascent",
-                       style = "color: #f3b24b; text-decoration: underline;"),
+                       style = "color: #d4915c; text-decoration: underline;"),
             ".",
             class = "small mb-2"
           ),
@@ -73,7 +73,7 @@ conduit_about_tab_ui <- function() {
           div(
             class = "flex-shrink-0 text-center",
             style = "width: 64px;",
-            icon("robot", style = "font-size: 2.5rem; color: #f3b24b;")
+            icon("robot", style = "font-size: 2.5rem; color: #d4915c;")
           ),
           div(
             class = "flex-grow-1",
@@ -87,7 +87,7 @@ conduit_about_tab_ui <- function() {
               "goto_ai_from_about",
               tagList(icon("robot"), " Open AI Assistant"),
               class = "btn-sm",
-              style = "background: #f3b24b; border-color: #f3b24b; color: #1a1a2e; font-weight: 600;"
+              style = "background: #d4915c; border-color: #d4915c; color: #3b352a; font-weight: 600;"
             )
           )
         )

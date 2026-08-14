@@ -4,8 +4,8 @@ conduit_view_assay_tab_ui <- function(id = "view_assay") {
     sidebar = bslib::sidebar(
       title = "Options",
       width = 260,
-      bg    = "#f8f9fb",
-      fg    = "#1a1a2e",
+      bg    = "#faf6ee",
+      fg    = "#3b352a",
       open  = "open",
       shinyWidgets::pickerInput(
         ns("assay_to_show"),
@@ -53,7 +53,7 @@ conduit_view_assay_tab_ui <- function(id = "view_assay") {
         bslib::card_body(
           shinycssloaders::withSpinner(
             DT::dataTableOutput(ns("assay_table")),
-            type = 8, caption = "Loading assay data...", color = "#15131e"
+            type = 8, caption = "Loading assay data...", color = "#2f2a20"
           )
         )
       )

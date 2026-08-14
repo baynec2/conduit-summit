@@ -27,8 +27,8 @@ conduit_metadata_tab_ui <- function(id = "view_metadata") {
         title    = "Plot Controls",
 
         width    = 260,
-        bg       = "#f8f9fb",
-        fg       = "#1a1a2e",
+        bg       = "#faf6ee",
+        fg       = "#3b352a",
         uiOutput(ns("metadata_variable_choices_to_plot_ui"))
       ),
       tagList(

@@ -4,8 +4,8 @@ conduit_database_tab_ui <- function(id = "database") {
     sidebar = bslib::sidebar(
       title  = "Controls",
       width  = 260,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       selectInput(
         ns("taxa_tree_layout"),
         "Tree Layout",
@@ -56,7 +56,7 @@ conduit_database_tab_ui <- function(id = "database") {
         shinycssloaders::withSpinner(
           plotOutput(ns("taxa_tree_plot"), width = "100%", height = "600px"),
           type = 8, caption = "Please wait, the taxonomic tree is loading...",
-          color = "#15131e"
+          color = "#2f2a20"
         )
       )
     ),

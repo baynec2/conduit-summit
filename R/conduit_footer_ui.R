@@ -5,7 +5,7 @@ conduit_footer_ui <- function() {
       href = "https://github.com",
       target = "_blank",
       icon("github"),
-      style = "color: #6c757d;"
+      style = "color: #6f6552;"
     ),
     "Developed by Charlie Bayne in the Gonzalez Lab at the University of California San Diego"
   )

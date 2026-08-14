@@ -4,8 +4,8 @@ conduit_filter_data_tab_ui <- function(id = "filter_data") {
     sidebar = bslib::sidebar(
       title  = "Filters",
       width  = 310,
-      bg     = "#f8f9fb",
-      fg     = "#1a1a2e",
+      bg     = "#faf6ee",
+      fg     = "#3b352a",
       open   = "open",
       bslib::accordion(
         open = FALSE,

@@ -213,14 +213,14 @@ conduit_analysis_server <- function(id, final_qf, processed_assay, selected_assa
           plotly::plotlyOutput(NS(id, "heatmap_plotly"), height = "600px"),
           type = 8,
           caption = "One interactive heatmap coming up...",
-          color = "#15131efe"
+          color = "#2f2a20fe"
         )
       } else {
         shinycssloaders::withSpinner(
           plotOutput(NS(id, "heatmap_plot_static"), height = "600px"),
           type = 8,
           caption = "One static heatmap is on the way...",
-          color = "#15131efe"
+          color = "#2f2a20fe"
         )
       }
     })
