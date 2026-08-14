@@ -27,9 +27,25 @@ create_conduit_theme <- function() {
     # analysis container at every startup — a hang or a hard failure on a
     # station with no route out. Linking them puts the fetch in the browser,
     # where a miss degrades to the fallback stack.
-    base_font    = bslib::font_google("Albert Sans", local = FALSE),
-    heading_font = bslib::font_google("Albert Sans", local = FALSE),
-    code_font    = bslib::font_google("JetBrains Mono", local = FALSE),
+    # wght matters as much as the family. Requesting the family alone fetches
+    # weight 400 only, and the CSS below asks for 600, 700 and 800 — so the
+    # browser fakes every bold by smearing the regular glyphs. That reads as
+    # soft, slightly blurred text, and it is worst exactly where this app
+    # uses it most: small uppercase letter-spaced card headers.
+    #
+    # Every weight is listed rather than given as endpoints: bslib emits
+    # `wght@0,300;0,800` for c(300, 800) — the two values, not the range
+    # between them — so 600 and 700 would snap to whichever loaded weight is
+    # nearest instead of being drawn at the weight asked for.
+    base_font    = bslib::font_google("Albert Sans", local = FALSE,
+                                      wght = c(300, 400, 500, 600, 700, 800),
+                                      ital = c(0, 1)),
+    heading_font = bslib::font_google("Albert Sans", local = FALSE,
+                                      wght = c(300, 400, 500, 600, 700, 800),
+                                      ital = c(0, 1)),
+    code_font    = bslib::font_google("JetBrains Mono", local = FALSE,
+                                      wght = c(400, 500, 600, 700),
+                                      ital = c(0, 1)),
     # Chrome takes Basecamp's warm near-blacks, so the navbar and sidebar are
     # continuous with the app Summit is embedded in, while the content area
     # stays a light document surface.
@@ -46,6 +62,13 @@ create_conduit_theme <- function() {
     "card-border-radius"   = "0.6rem"
   ) |>
     bslib::bs_add_rules("
+    /* Basecamp enables the same stylistic sets on its body text, which
+       changes the letterforms themselves — without these the two apps use
+       visibly different glyphs for the same family. */
+    body {
+      font-feature-settings: 'ss01', 'cv11';
+    }
+
     /* ── Top navbar tab links ───────────────────────────── */
     .navbar .navbar-nav .nav-link {
       color: rgba(239, 230, 210, 0.78) !important;
@@ -94,7 +117,7 @@ create_conduit_theme <- function() {
 
     /* ── Light card variant (plot containers) ────────────── */
     .card.card-light > .card-header {
-      background-color: #fff3d8 !important;
+      background-color: #ffffff !important;
       color: #3b352a !important;
       border-bottom: 2px solid #d4915c !important;
       font-size: 0.78rem;
@@ -207,12 +230,12 @@ create_conduit_theme <- function() {
     .tab-content input[type='text'],
     .tab-content input[type='number'] {
       color: #3b352a !important;
-      background-color: #fff3d8 !important;
+      background-color: #ffffff !important;
     }
     .tab-content .selectize-input,
     .tab-content .selectize-dropdown {
       color: #3b352a !important;
-      background-color: #fff3d8 !important;
+      background-color: #ffffff !important;
     }
     .tab-content .accordion-button {
       color: #3b352a !important;
@@ -246,7 +269,7 @@ create_conduit_theme <- function() {
     .bslib-sidebar-layout > .sidebar .form-select,
     .bslib-sidebar-layout > .sidebar .selectize-input {
       color: #3b352a;
-      background-color: #fff3d8;
+      background-color: #ffffff;
     }
     .bslib-sidebar-layout > .sidebar hr {
       border-color: rgba(47, 42, 32, 0.12);
