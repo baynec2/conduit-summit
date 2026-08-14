@@ -57,6 +57,32 @@ jobs:
       - name: Set up renv
         uses: r-lib/actions/setup-renv@v2
 
+      # rsconnect refuses to bundle the app when the library and the lockfile
+      # disagree, and being in sync is a property of a MACHINE, not of the
+      # repository. The step above restores from the lockfile, but the record
+      # renv writes for a restored package can still differ from the record
+      # made wherever the snapshot was taken — a package installed here comes
+      # from RSPM's Linux binaries and is recorded as such, while the same
+      # package snapshotted on a developer's macOS may say CRAN. Same version,
+      # different provenance, and renv counts that as out of sync.
+      #
+      # So the lockfile is realigned against the library that was actually
+      # restored, here in the runner. Nothing is committed: this only makes
+      # the bundle self-consistent so rsconnect will build it. Versions are
+      # unaffected — they came from the committed lockfile a step ago.
+      #
+      # status() is printed first because when this breaks again, the list of
+      # disagreeing packages is the whole diagnosis, and rsconnect's own error
+      # does not include it.
+      - name: Align the lockfile with the restored library
+        run: |
+          Rscript -e '
+            cat("── renv::status() as restored ──\n")
+            try(print(renv::status()))
+            cat("── realigning ──\n")
+            renv::snapshot(prompt = FALSE)
+          '
+
       - name: Deploy to shinyapps.io
         env:
           SHINYAPPS_ACCOUNT: ${{ secrets.SHINYAPPS_ACCOUNT }}
