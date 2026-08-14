@@ -8,6 +8,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # renv.lock records two packages from GitHub — conduitR and metacoder —
+    # and resolving a git ref to a commit is an API call renv will not make
+    # unauthenticated. Without this, restore stops with "GitHub authentication
+    # credentials are not available" before installing anything.
+    #
+    # The workflow-provided token is enough; both repositories are public and
+    # this only needs read access. docker.yml already passes the same token
+    # into its build for the same reason, which is why the image kept
+    # building while this workflow could not.
+    #
+    # Set at job level so the restore and the alignment step below both have
+    # it — anything that touches the lockfile may need to resolve those refs.
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
