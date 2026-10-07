@@ -33,15 +33,21 @@ conduit_help_tab_ui <- function() {
           class = "conduit-quickstart-step",
           div(class = "conduit-quickstart-num", "1"),
           div(
-            tags$strong("Run Conduit-Ascent"),
+            tags$strong("Run conduit-ascent"),
             tags$p(
               class = "mb-1 text-muted small",
-              "Process your raw mass-spec data through the Snakemake workflow to produce a structured ",
-              tags$code(".rds"), " output file."
+              "Process your raw mass-spec data through the conduit-ascent workflow to produce a structured ",
+              tags$code(".rds"), " output file. Launch it from the conduit-basecamp desktop app",
+              " (Windows, macOS or Linux), or from the command line on Linux."
+            ),
+            tags$a(
+              href = "https://github.com/baynec2/conduit-basecamp", target = "_blank",
+              tagList(icon("arrow-up-right-from-square"), " conduit-basecamp"),
+              class = "btn btn-outline-primary btn-sm me-1"
             ),
             tags$a(
               href = "https://github.com/baynec2/conduit-ascent", target = "_blank",
-              tagList(icon("arrow-up-right-from-square"), " Conduit-Ascent setup guide"),
+              tagList(icon("arrow-up-right-from-square"), " conduit-ascent setup guide"),
               class = "btn btn-outline-primary btn-sm"
             )
           )
@@ -167,20 +173,25 @@ conduit_help_tab_ui <- function() {
     h6("The Conduit Ecosystem", class = "text-muted text-uppercase fw-bold mb-2 mt-1",
        style = "letter-spacing: 0.06em; font-size: 0.75rem;"),
     bslib::layout_columns(
-      col_widths = c(4, 4, 4),
+      col_widths = bslib::breakpoints(sm = 12, md = 6, lg = 3),
       ecosystem_card(
-        "terminal", "Conduit-Ascent",
-        "A Snakemake command-line workflow for scalable, reproducible metaproteomics processing. Identifies peptides, resolves taxonomy, and produces structured outputs.",
+        "terminal", "conduit-ascent",
+        "A Snakemake workflow for scalable, reproducible metaproteomics processing. Identifies peptides, resolves taxonomy, and produces structured outputs.",
         "https://github.com/baynec2/conduit-ascent"
       ),
       ecosystem_card(
-        "chart-line", "Conduit-Summit",
-        "This app. A visual interface for exploring Conduit-Ascent results — plots, statistics, enrichment, and pathway analysis — no coding required.",
+        "laptop", "conduit-basecamp",
+        "A desktop app for configuring and launching conduit-ascent without the command line, on Windows, macOS or Linux.",
+        "https://github.com/baynec2/conduit-basecamp"
+      ),
+      ecosystem_card(
+        "chart-line", "conduit-summit",
+        "This app. A visual interface for exploring conduit-ascent results — plots, statistics, enrichment, and pathway analysis — no coding required.",
         "https://github.com/baynec2/conduit-summit"
       ),
       ecosystem_card(
-        "cube", "ConduitR",
-        "The R package that powers both tools. Provides utility functions, visualizations, and helper methods for advanced users building on the framework.",
+        "cube", "conduitR",
+        "The R package used by conduit-ascent and conduit-summit. Provides utility functions, visualizations, and helper methods for advanced users building on the framework.",
         "https://github.com/baynec2/conduitR"
       )
     ),
@@ -191,20 +202,21 @@ conduit_help_tab_ui <- function() {
     bslib::accordion(
       open = FALSE,
       bslib::accordion_panel(
-        title = "Why three separate tools?",
+        title = "Why four separate tools?",
         icon  = icon("circle-question"),
         p(
-          "Each tool has a distinct job.",
-          tags$strong("Conduit-Ascent"), " handles scalable, reproducible computation at the command line.",
-          tags$strong(" Conduit-Summit"), " makes the results interactive and interpretable — no code needed.",
-          tags$strong(" ConduitR"), " is the glue: an R package supporting internal logic and enabling power users to extend the framework."
+          "Each tool has a distinct job. ",
+          tags$strong("conduit-ascent"), " handles scalable, reproducible computation.",
+          tags$strong(" conduit-basecamp"), " sets up and launches conduit-ascent from a desktop app, no command line needed.",
+          tags$strong(" conduit-summit"), " makes the results interactive and interpretable — no code needed.",
+          tags$strong(" conduitR"), " is the glue: an R package supporting internal logic and enabling power users to extend the framework."
         )
       ),
       bslib::accordion_panel(
-        title = "What input files does Conduit-Summit accept?",
+        title = "What input files does conduit-summit accept?",
         icon  = icon("file"),
         p(
-          "For full functionality, upload an ", tags$code(".rds"), " file produced by the Conduit-Ascent workflow.",
+          "For full functionality, upload an ", tags$code(".rds"), " file produced by the conduit-ascent workflow.",
           " This contains all raw data, metadata, taxonomy mappings, and metrics in a single structured object."
         ),
         p(
@@ -217,16 +229,21 @@ conduit_help_tab_ui <- function() {
         title = "How do I get the Conduit .rds file?",
         icon  = icon("box-archive"),
         p(
-          "You need to run the Conduit-Ascent workflow, which currently requires command-line access.",
-          " We provide detailed setup instructions to make this as straightforward as possible."
+          "Run the conduit-ascent workflow on your raw mass-spec data. The easiest way is ",
+          tags$strong("conduit-basecamp"), ", a desktop app for Windows, macOS and Linux that sets up",
+          " and launches the workflow without the command line."
         ),
         p(class = "mb-0",
-          tags$em("Conduit-Basecamp"), " — a graphical interface for Conduit-Ascent — is in development.",
-          " For now:"
+          "On Linux you can also run conduit-ascent directly from the command line."
+        ),
+        tags$a(
+          href = "https://github.com/baynec2/conduit-basecamp", target = "_blank",
+          tagList(icon("arrow-up-right-from-square"), " Get conduit-basecamp"),
+          class = "btn btn-outline-primary btn-sm mt-2 me-1"
         ),
         tags$a(
           href = "https://github.com/baynec2/conduit-ascent", target = "_blank",
-          tagList(icon("arrow-up-right-from-square"), " View setup instructions on GitHub"),
+          tagList(icon("arrow-up-right-from-square"), " Command-line setup instructions"),
           class = "btn btn-outline-primary btn-sm mt-2"
         )
       ),
@@ -237,7 +254,7 @@ conduit_help_tab_ui <- function() {
           "Only if you choose a cloud provider (Anthropic, OpenAI, or Google Gemini).",
           " In that case, your messages and a summary of your dataset structure are sent to that provider's API",
           " — the same way any API call works. Your API key is held only in your browser session",
-          " and is never stored by Conduit-Summit."
+          " and is never stored by conduit-summit."
         ),
         p(class = "mb-0",
           "If you prefer to keep your data entirely local, use the ",
@@ -248,7 +265,7 @@ conduit_help_tab_ui <- function() {
         title = "Do I need R programming experience?",
         icon  = icon("code"),
         p(class = "mb-0",
-          "No. Conduit-Summit is designed to be fully usable without writing any code.",
+          "No. conduit-summit is designed to be fully usable without writing any code.",
           " All analysis, filtering, and visualisation is controlled through point-and-click interfaces."
         )
       ),
