@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Conduit-Summit
+# conduit-summit
 
 [![Build and Push Docker
 Image](https://github.com/baynec2/conduit-summit/actions/workflows/docker.yml/badge.svg)](https://github.com/baynec2/conduit-summit/actions/workflows/docker.yml)
@@ -12,22 +12,23 @@ Demo](https://img.shields.io/badge/live%20demo-shinyapps.io-blue)](https://gonza
 
 A point-and-click interface for exploring and analyzing metaproteomic
 data — no coding required. Upload the `.rds` file produced by
-[Conduit-Ascent](https://github.com/baynec2/conduit-ascent) and work
+[conduit-ascent](https://github.com/baynec2/conduit-ascent) and work
 through an eight-step analysis workflow entirely in your browser.
 
 ## The Conduit Ecosystem
 
-Conduit-Summit is one part of a three-tool metaproteomics platform:
+conduit-summit is one part of the Conduit metaproteomics ecosystem:
 
 | Tool | Role |
-|----|---|
-| [Conduit-Ascent](https://github.com/baynec2/conduit-ascent) | Snakemake command-line workflow. Processes raw mass-spec data, identifies peptides, resolves taxonomy, and produces a structured `.rds` output. |
-| **Conduit-Summit** (this repo) | Visual interface for exploring Conduit-Ascent results. All analysis is point-and-click. |
-| [ConduitR](https://github.com/baynec2/conduitR) | The R package powering both tools. Available for advanced users who want to build on the framework. |
+|---|---|
+| [conduit-ascent](https://github.com/baynec2/conduit-ascent) | Snakemake workflow. Processes raw mass-spec data, identifies peptides, resolves taxonomy, and produces a structured `.rds` output. |
+| [conduit-basecamp](https://github.com/baynec2/conduit-basecamp) | Desktop app for configuring and launching conduit-ascent without the command line, on Windows, macOS or Linux. |
+| **conduit-summit** (this repo) | Visual interface for exploring conduit-ascent results. All analysis is point-and-click. |
+| [conduitR](https://github.com/baynec2/conduitR) | The R package used by conduit-ascent and conduit-summit. Available for advanced users who want to build on the framework. |
 
 ## Quick Start
 
-The easiest way to run Conduit-Summit is with Docker — no R
+The easiest way to run conduit-summit is with Docker — no R
 installation needed:
 
 ``` bash
@@ -44,7 +45,7 @@ Once a file is uploaded, eight analysis tabs unlock in sequence:
 
 | Step | Tab | What you can do |
 |------|-----|-----------------|
-| 1 | **File Upload** | Upload your Conduit-Ascent `.rds` file and preview taxonomic coverage |
+| 1 | **File Upload** | Upload your conduit-ascent `.rds` file and preview taxonomic coverage |
 | 2 | **Database** | Explore detected species, protein groups, and per-sample summaries |
 | 3 | **DIA-NN QC** | Review database search quality metrics |
 | 4 | **View Metadata** | Inspect sample annotations and experimental design |
@@ -92,3 +93,14 @@ shiny::runApp()
 Bug reports and feature requests are welcome — please [open an
 issue](https://github.com/baynec2/conduit-summit/issues) and include
 your R session info where relevant.
+
+## Versions
+
+Releases are tagged on `main` (`v0.1.0`, ...) and listed in
+[`CHANGELOG.md`](CHANGELOG.md). Each release is also published as a Docker
+image tag, e.g. `docker pull baynec2/conduit-summit:0.1.0`.
+
+## License
+
+conduit-summit is released under the [MIT License](LICENSE), copyright ©
+2025-2026 Charlie Bayne.
